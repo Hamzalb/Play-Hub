@@ -1,7 +1,17 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
+
+const BACKEND_URL = process.env.BACKEND_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  async rewrites() {
+    return [
+      {
+        // Browser calls /api/* → Next.js proxies to Express (no CORS needed)
+        source: '/api/:path*',
+        destination: `${BACKEND_URL}/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

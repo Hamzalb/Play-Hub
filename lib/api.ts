@@ -1,18 +1,21 @@
 import { ApiResponse } from '@/types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000';
+// All calls go through the Next.js BFF proxy (/api/*) to avoid CORS.
+// The proxy rewrites /api/:path* → http://localhost:5000/:path*
+const API_BASE = '/api';
 
 class ApiClient {
   private accessToken: string | null = null;
 
-  setToken(token: string | null) {
+  setToken(token: string | null): void {
     this.accessToken = token;
   }
 
-  private async request<T>(
-    path: string,
-    options: RequestInit = {}
-  ): Promise<ApiResponse<T>> {
+  getToken(): string | null {
+    return this.accessToken;
+  }
+
+  private async request<T>(path: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
@@ -22,40 +25,32 @@ class ApiClient {
     }
 
     const res = await fetch(`${API_BASE}${path}`, {
+      credentials: 'include',  // send cookies (refresh token) with every request
       ...options,
-      headers: { ...headers, ...(options.headers as Record<string, string>) },
+      headers: { ...headers, ...(options.headers as Record<string, string> | undefined) },
     });
 
     const json = (await res.json()) as ApiResponse<T>;
     return json;
   }
 
-  get<T>(path: string) {
+  get<T>(path: string): Promise<ApiResponse<T>> {
     return this.request<T>(path);
   }
 
-  post<T>(path: string, body: unknown) {
-    return this.request<T>(path, {
-      method: 'POST',
-      body: JSON.stringify(body),
-    });
+  post<T>(path: string, body: unknown): Promise<ApiResponse<T>> {
+    return this.request<T>(path, { method: 'POST', body: JSON.stringify(body) });
   }
 
-  put<T>(path: string, body: unknown) {
-    return this.request<T>(path, {
-      method: 'PUT',
-      body: JSON.stringify(body),
-    });
+  put<T>(path: string, body: unknown): Promise<ApiResponse<T>> {
+    return this.request<T>(path, { method: 'PUT', body: JSON.stringify(body) });
   }
 
-  patch<T>(path: string, body: unknown) {
-    return this.request<T>(path, {
-      method: 'PATCH',
-      body: JSON.stringify(body),
-    });
+  patch<T>(path: string, body: unknown): Promise<ApiResponse<T>> {
+    return this.request<T>(path, { method: 'PATCH', body: JSON.stringify(body) });
   }
 
-  delete<T>(path: string) {
+  delete<T>(path: string): Promise<ApiResponse<T>> {
     return this.request<T>(path, { method: 'DELETE' });
   }
 }

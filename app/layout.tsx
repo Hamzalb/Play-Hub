@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/ui/ThemeProvider';
 import { PageTransition } from '@/components/ui/PageTransition';
+import { AuthProvider } from '@/lib/auth';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -36,7 +37,9 @@ export default function RootLayout({
     >
       <body className="min-h-dvh bg-[var(--color-bg-base)] text-[var(--color-text-primary)]">
         <ThemeProvider>
-          <PageTransition>{children}</PageTransition>
+          <AuthProvider>
+            <PageTransition>{children}</PageTransition>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
