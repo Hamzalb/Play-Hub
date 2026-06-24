@@ -1,28 +1,44 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
+import { ThemeProvider } from '@/components/ui/ThemeProvider';
+import { PageTransition } from '@/components/ui/PageTransition';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
+  display: 'swap',
 });
 
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: 'PlayHub — Entertainment Center Management',
-  description: 'Multi-location entertainment center management: POS, bookings, members, inventory, and more.',
+  title: {
+    default: 'PlayHub — Entertainment Center Management',
+    template: '%s | PlayHub',
+  },
+  description:
+    'Multi-location entertainment center management: POS, bookings, members, inventory, and more.',
 };
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full bg-background text-foreground">{children}</body>
+    <html
+      lang="en"
+      data-theme="dark"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
+      <body className="min-h-dvh bg-[var(--color-bg-base)] text-[var(--color-text-primary)]">
+        <ThemeProvider>
+          <PageTransition>{children}</PageTransition>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
