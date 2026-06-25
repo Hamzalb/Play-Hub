@@ -1,105 +1,230 @@
 @import "tailwindcss";
 
-/* ─── PlayHub Design Tokens ──────────────────────────────────────────────── */
-/* Neo-arcade dark theme: deep midnight base + electric accent trio          */
+/* ─── PlayHub Design System v2: Premium Dark Studio ──────────────────────── */
+/* Direction: cinematic precision — premium SaaS meets entertainment.         */
 
 @theme inline {
-  /* ── Palette: base ── */
-  --color-bg-base:        #070b14;   /* deep midnight */
-  --color-bg-elevated:    #0d1321;   /* card surface */
-  --color-bg-overlay:     #111827;   /* overlays, modals */
-  --color-bg-subtle:      #1a2234;   /* subtle backgrounds */
-  --color-border:         #1e2d45;   /* default border */
-  --color-border-strong:  #2d4060;   /* focused/active border */
+  /* ── Base surfaces ── */
+  --color-base:        #03050c;   /* near-black, cooler than pure black */
+  --color-surface:     #07090f;   /* card bg */
+  --color-surface-2:   #0c0e18;   /* elevated card */
+  --color-surface-3:   #111424;   /* hover state */
+  --color-border:      rgba(255,255,255,0.06);
+  --color-border-hover: rgba(255,255,255,0.12);
+  --color-border-focus: rgba(139,92,246,0.6);
 
-  /* ── Palette: text ── */
+  /* ── Text ── */
   --color-text-primary:   #f0f4ff;
-  --color-text-secondary: #8a9bc4;
-  --color-text-muted:     #4a5980;
+  --color-text-secondary: rgba(240,244,255,0.60);
+  --color-text-muted:     rgba(240,244,255,0.35);
+  --color-text-faint:     rgba(240,244,255,0.18);
 
-  /* ── Palette: accents ── */
-  --color-violet:         #7c3aed;   /* electric violet */
-  --color-violet-light:   #a78bfa;
-  --color-violet-glow:    #7c3aed33;
-  --color-cyan:           #06b6d4;   /* cyan */
-  --color-cyan-light:     #67e8f9;
-  --color-cyan-glow:      #06b6d433;
-  --color-lime:           #84cc16;   /* lime */
-  --color-lime-light:     #bef264;
-  --color-lime-glow:      #84cc1633;
+  /* ── Primary accent: indigo-violet ── */
+  --color-violet:       #7c3aed;
+  --color-violet-mid:   #8b5cf6;
+  --color-violet-light: #a78bfa;
+  --color-violet-dim:   rgba(139,92,246,0.14);
+  --color-violet-glow:  rgba(139,92,246,0.28);
 
-  /* ── Palette: status ── */
-  --color-success:        #22c55e;
-  --color-warning:        #f59e0b;
-  --color-danger:         #ef4444;
-  --color-info:           #3b82f6;
+  /* ── Highlight: warm gold (premium feel) ── */
+  --color-gold:         #f59e0b;
+  --color-gold-light:   #fcd34d;
+  --color-gold-dim:     rgba(245,158,11,0.14);
+
+  /* ── Data accent: cyan ── */
+  --color-cyan:         #06b6d4;
+  --color-cyan-light:   #67e8f9;
+  --color-cyan-dim:     rgba(6,182,212,0.12);
+
+  /* ── Status ── */
+  --color-success:  #34d399;
+  --color-warning:  #fbbf24;
+  --color-danger:   #f87171;
+  --color-info:     #60a5fa;
+
+  /* ── Aurora glow colors (for background mesh) ── */
+  --aurora-1: rgba(139,92,246,0.12);   /* violet */
+  --aurora-2: rgba(6,182,212,0.08);    /* cyan */
+  --aurora-3: rgba(245,158,11,0.06);   /* gold */
+  --aurora-4: rgba(236,72,153,0.05);   /* rose */
 
   /* ── Typography ── */
-  --font-display:  var(--font-geist-sans);   /* swap for Clash Display in Phase 13 */
-  --font-body:     var(--font-geist-sans);
-  --font-mono:     var(--font-geist-mono);
+  --font-display: var(--font-space-grotesk), var(--font-geist-sans), system-ui, sans-serif;
+  --font-body:    var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono:    var(--font-geist-mono), monospace;
 
-  --font-size-xs:   0.75rem;
-  --font-size-sm:   0.875rem;
-  --font-size-base: 1rem;
-  --font-size-lg:   1.125rem;
-  --font-size-xl:   1.25rem;
-  --font-size-2xl:  1.5rem;
-  --font-size-3xl:  1.875rem;
-  --font-size-4xl:  2.25rem;
-  --font-size-5xl:  3rem;
+  /* ── Spacing / Layout ── */
+  --bento-gap: 1.25rem;
+  --bento-p:   1.75rem;
+  --section-gap: 6rem;
 
   /* ── Radius ── */
-  --radius-sm:   0.375rem;   /* 6px */
-  --radius-md:   0.75rem;    /* 12px */
-  --radius-lg:   1rem;       /* 16px */
-  --radius-xl:   1.5rem;     /* 24px */
-  --radius-2xl:  2rem;       /* 32px */
+  --radius-xs:  4px;
+  --radius-sm:  8px;
+  --radius-md:  12px;
+  --radius-lg:  16px;
+  --radius-xl:  20px;
+  --radius-2xl: 28px;
 
-  /* ── Spacing ── */
-  --bento-gap:   1rem;
-  --bento-p:     1.5rem;
+  /* ── Shadows ── */
+  --shadow-card:       0 1px 40px -8px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.04) inset;
+  --shadow-card-hover: 0 4px 48px -8px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.08) inset;
+  --shadow-glow-violet: 0 0 48px rgba(139,92,246,0.35);
+  --shadow-glow-cyan:   0 0 48px rgba(6,182,212,0.25);
+  --shadow-glow-gold:   0 0 48px rgba(245,158,11,0.25);
+  --shadow-float:       0 24px 80px rgba(0,0,0,0.6);
 
-  /* ── Shadows / Glow ── */
-  --shadow-card:        0 4px 24px 0 rgba(0,0,0,0.45);
-  --shadow-card-hover:  0 8px 40px 0 rgba(0,0,0,0.55);
-  --shadow-glow-violet: 0 0 32px 0 var(--color-violet-glow);
-  --shadow-glow-cyan:   0 0 32px 0 var(--color-cyan-glow);
-  --shadow-glow-lime:   0 0 32px 0 var(--color-lime-glow);
-
-  /* ── Tailwind aliases ── */
-  --color-background: var(--color-bg-base);
+  /* Tailwind color aliases */
+  --color-background: var(--color-base);
   --color-foreground: var(--color-text-primary);
 }
 
-/* ─── Base styles ─────────────────────────────────────────────────────────── */
-*, *::before, *::after {
-  box-sizing: border-box;
-}
+/* ─── Base ─────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
 
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
 }
 
 body {
-  background-color: var(--color-bg-base);
+  background-color: var(--color-base);
   color: var(--color-text-primary);
-  font-family: var(--font-body), system-ui, sans-serif;
+  font-family: var(--font-body);
   min-height: 100dvh;
+  line-height: 1.6;
 }
 
-/* ─── Reduced-motion fallback (WCAG) ─────────────────────────────────────── */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+/* ─── Aurora background ─────────────────────────────────────────────────────
+   Animated mesh gradient — gives the "premium studio" vibe.
+   Fixed position so it scrolls behind content.                               */
+.aurora-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
-/* ─── Bento Grid utilities ────────────────────────────────────────────────── */
+.aurora-bg::before,
+.aurora-bg::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.6;
+  animation: aurora-drift 18s ease-in-out infinite alternate;
+}
+
+.aurora-bg::before {
+  width: 70vw;
+  height: 70vw;
+  top: -20%;
+  left: -10%;
+  background: radial-gradient(ellipse, var(--aurora-1) 0%, transparent 70%);
+  animation-duration: 20s;
+}
+
+.aurora-bg::after {
+  width: 60vw;
+  height: 60vw;
+  bottom: -20%;
+  right: -10%;
+  background: radial-gradient(ellipse, var(--aurora-2) 0%, transparent 70%);
+  animation-duration: 24s;
+  animation-delay: -8s;
+}
+
+@keyframes aurora-drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(5%, 3%) scale(1.08); }
+  66%  { transform: translate(-3%, 6%) scale(0.95); }
+  100% { transform: translate(4%, -4%) scale(1.05); }
+}
+
+/* A third blob — gold, subtle */
+.aurora-gold {
+  position: absolute;
+  width: 40vw;
+  height: 40vw;
+  top: 40%;
+  left: 40%;
+  background: radial-gradient(ellipse, var(--aurora-3) 0%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.5;
+  animation: aurora-drift 28s ease-in-out infinite alternate-reverse;
+  pointer-events: none;
+}
+
+/* ─── Noise grain overlay ───────────────────────────────────────────────────
+   Very subtle — adds texture that separates premium from generic.             */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+
+/* ─── Page content wrapper ──────────────────────────────────────────────────
+   Ensures content sits above aurora + grain.                                  */
+.page-content {
+  position: relative;
+  z-index: 2;
+}
+
+/* ─── Glass card — ultra-refined ────────────────────────────────────────────
+   Barely-there frosted glass — the card almost disappears into the bg.        */
+.glass-card {
+  background: rgba(255,255,255,0.028);
+  backdrop-filter: blur(24px) saturate(120%);
+  -webkit-backdrop-filter: blur(24px) saturate(120%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  padding: var(--bento-p);
+  transition: background 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.glass-card:hover {
+  background: rgba(255,255,255,0.045);
+  border-color: var(--color-border-hover);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* Card accent variant */
+.glass-card-violet {
+  border-color: rgba(139,92,246,0.22);
+  box-shadow: var(--shadow-card), 0 0 0 1px rgba(139,92,246,0.1) inset;
+}
+
+.glass-card-gold {
+  border-color: rgba(245,158,11,0.22);
+  box-shadow: var(--shadow-card), 0 0 0 1px rgba(245,158,11,0.08) inset;
+}
+
+.glass-card-cyan {
+  border-color: rgba(6,182,212,0.22);
+  box-shadow: var(--shadow-card), 0 0 0 1px rgba(6,182,212,0.08) inset;
+}
+
+/* ─── Bento grid ────────────────────────────────────────────────────────────  */
 .bento-grid {
   display: grid;
   gap: var(--bento-gap);
@@ -107,7 +232,6 @@ body {
   width: 100%;
 }
 
-/* Span helpers (1-12 cols, 1-6 rows) */
 .col-span-1  { grid-column: span 1; }
 .col-span-2  { grid-column: span 2; }
 .col-span-3  { grid-column: span 3; }
@@ -120,46 +244,114 @@ body {
 .col-span-10 { grid-column: span 10; }
 .col-span-11 { grid-column: span 11; }
 .col-span-12 { grid-column: span 12; }
+.row-span-1  { grid-row: span 1; }
+.row-span-2  { grid-row: span 2; }
+.row-span-3  { grid-row: span 3; }
 
-.row-span-1 { grid-row: span 1; }
-.row-span-2 { grid-row: span 2; }
-.row-span-3 { grid-row: span 3; }
+/* ─── Gradient text ─────────────────────────────────────────────────────────
+   Used for display headings and KPI values.                                   */
+.text-gradient-violet {
+  background: linear-gradient(135deg, var(--color-violet-light) 0%, var(--color-violet-mid) 50%, #c084fc 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 
-/* ─── Glassmorphism card ──────────────────────────────────────────────────── */
-.glass-card {
+.text-gradient-gold {
+  background: linear-gradient(135deg, var(--color-gold-light) 0%, var(--color-gold) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-hero {
   background: linear-gradient(
     135deg,
-    rgba(13, 19, 33, 0.85) 0%,
-    rgba(17, 24, 39, 0.70) 100%
+    #f0f4ff 0%,
+    rgba(167,139,250,0.9) 40%,
+    rgba(103,232,249,0.8) 100%
   );
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-card);
-  padding: var(--bento-p);
-  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.glass-card:hover {
-  box-shadow: var(--shadow-card-hover);
-  border-color: var(--color-border-strong);
-}
-
-/* ─── Glow accents ────────────────────────────────────────────────────────── */
+/* ─── Glow utilities ────────────────────────────────────────────────────────  */
 .glow-violet { box-shadow: var(--shadow-glow-violet); }
 .glow-cyan   { box-shadow: var(--shadow-glow-cyan); }
-.glow-lime   { box-shadow: var(--shadow-glow-lime); }
+.glow-gold   { box-shadow: var(--shadow-glow-gold); }
 
-/* ─── Focus visible (WCAG AA) ────────────────────────────────────────────── */
+/* ─── Divider line ──────────────────────────────────────────────────────────  */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-border) 30%, var(--color-border) 70%, transparent);
+  border: none;
+}
+
+/* ─── Stat pill ─────────────────────────────────────────────────────────────
+   The little pill that shows a metric inline in hero sections.               */
+.stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.875rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: rgba(255,255,255,0.04);
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────────────────────────  */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+/* ─── Focus visible ─────────────────────────────────────────────────────────  */
 :focus-visible {
   outline: 2px solid var(--color-violet-light);
-  outline-offset: 2px;
+  outline-offset: 3px;
   border-radius: var(--radius-sm);
 }
 
-/* ─── Scrollbar (Chromium) ────────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--color-bg-base); }
-::-webkit-scrollbar-thumb { background: var(--color-border-strong); border-radius: 999px; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
+/* ─── Touch action: eliminate 300ms tap delay on mobile (WCAG §2) ──────────  */
+button, a, [role="button"], [role="tab"],
+input[type="submit"], input[type="reset"],
+select, label { touch-action: manipulation; }
+
+/* ─── Skip to content (WCAG §1 skip-links) ─────────────────────────────────  */
+.skip-to-content {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 9999;
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-md);
+  background: var(--color-violet-mid);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: top 0.15s ease;
+  white-space: nowrap;
+}
+.skip-to-content:focus { top: 1rem; }
+
+/* ─── Reduced motion ────────────────────────────────────────────────────────  */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ─── Responsive bento collapse ─────────────────────────────────────────────
+   Below md: all cards go full-width.                                          */
+@media (max-width: 767px) {
+  .bento-grid > * {
+    grid-column: span 12 !important;
+    grid-row: span 1 !important;
+  }
+}

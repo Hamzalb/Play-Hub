@@ -1,15 +1,19 @@
 import { cn } from '@/lib/utils';
 
-type BadgeVariant = 'violet' | 'cyan' | 'lime' | 'success' | 'warning' | 'danger' | 'muted';
+type BadgeVariant =
+  | 'violet' | 'gold' | 'cyan'
+  | 'success' | 'warning' | 'danger'
+  | 'muted' | 'outline';
 
 const variantMap: Record<BadgeVariant, string> = {
-  violet:  'bg-[var(--color-violet-glow)] text-[var(--color-violet-light)] border-[var(--color-violet)]',
-  cyan:    'bg-[var(--color-cyan-glow)]   text-[var(--color-cyan-light)]   border-[var(--color-cyan)]',
-  lime:    'bg-[var(--color-lime-glow)]   text-[var(--color-lime-light)]   border-[var(--color-lime)]',
-  success: 'bg-[#22c55e20] text-[var(--color-success)] border-[var(--color-success)]',
-  warning: 'bg-[#f59e0b20] text-[var(--color-warning)] border-[var(--color-warning)]',
-  danger:  'bg-[#ef444420] text-[var(--color-danger)]  border-[var(--color-danger)]',
-  muted:   'bg-[var(--color-bg-subtle)] text-[var(--color-text-muted)] border-[var(--color-border)]',
+  violet:  'bg-[var(--color-violet-dim)]  text-[var(--color-violet-light)] border-[rgba(139,92,246,0.3)]',
+  gold:    'bg-[var(--color-gold-dim)]    text-[var(--color-gold-light)]   border-[rgba(245,158,11,0.3)]',
+  cyan:    'bg-[var(--color-cyan-dim)]    text-[var(--color-cyan-light)]   border-[rgba(6,182,212,0.3)]',
+  success: 'bg-[rgba(52,211,153,0.12)]    text-[var(--color-success)]      border-[rgba(52,211,153,0.3)]',
+  warning: 'bg-[rgba(251,191,36,0.12)]    text-[var(--color-warning)]      border-[rgba(251,191,36,0.3)]',
+  danger:  'bg-[rgba(248,113,113,0.12)]   text-[var(--color-danger)]       border-[rgba(248,113,113,0.3)]',
+  muted:   'bg-[rgba(255,255,255,0.05)]   text-[var(--color-text-muted)]   border-[var(--color-border)]',
+  outline: 'bg-transparent               text-[var(--color-text-secondary)] border-[var(--color-border)]',
 };
 
 interface BadgeProps {
@@ -22,7 +26,8 @@ export function Badge({ children, variant = 'muted', className }: BadgeProps) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5',
+        'text-xs font-medium tracking-wide whitespace-nowrap',
         variantMap[variant],
         className
       )}

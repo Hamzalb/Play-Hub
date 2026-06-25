@@ -156,7 +156,7 @@ function PosContent() {
                 <p className="text-sm font-semibold mb-1 truncate" style={{ color: 'var(--color-text-primary)' }}>{p.name}</p>
                 <p className="text-lg font-bold" style={{ color: 'var(--color-violet-light)' }}>${p.price.toFixed(2)}</p>
                 <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>Stock: {p.stock}</p>
-                <Badge variant={p.category === 'drink' ? 'cyan' : p.category === 'snack' ? 'lime' : 'muted'} className="mt-2">
+                <Badge variant={p.category === 'drink' ? 'cyan' : p.category === 'snack' ? 'gold' : 'muted'} className="mt-2">
                   {p.category}
                 </Badge>
               </button>

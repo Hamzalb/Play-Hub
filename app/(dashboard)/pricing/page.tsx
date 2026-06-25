@@ -219,7 +219,7 @@ function PricingContent() {
                 <div className="flex items-center gap-2 mb-2">
                   <h3 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{rule.name}</h3>
                   {rule.isHoliday && <Badge variant="danger">Holiday</Badge>}
-                  <Badge variant={rule.isActive ? 'lime' : 'muted'}>{rule.isActive ? 'Active' : 'Inactive'}</Badge>
+                  <Badge variant={rule.isActive ? 'success' : 'muted'}>{rule.isActive ? 'Active' : 'Inactive'}</Badge>
                 </div>
                 <p className="text-2xl font-bold mb-2" style={{ color: 'var(--color-cyan-light)' }}>
                   ×{rule.multiplier}

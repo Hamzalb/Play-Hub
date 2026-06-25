@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
 import { api } from '@/lib/api';
+import { useToast } from '@/components/ui/Toast';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Booking, ApiSuccess } from '@/types';
 
 interface AvailabilityZone {
@@ -19,10 +21,10 @@ interface AvailabilityZone {
 }
 
 type BookingStatus = 'pending' | 'confirmed' | 'active' | 'completed' | 'cancelled';
-const STATUS_COLORS: Record<BookingStatus, 'violet' | 'cyan' | 'lime' | 'success' | 'warning' | 'danger' | 'muted'> = {
+const STATUS_COLORS: Record<BookingStatus, 'violet' | 'cyan' | 'gold' | 'success' | 'warning' | 'danger' | 'muted'> = {
   pending:   'warning',
   confirmed: 'cyan',
-  active:    'lime',
+  active:    'gold',
   completed: 'success',
   cancelled: 'muted',
 };
@@ -50,6 +52,8 @@ function BookingsContent() {
   });
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState('');
+  const [cancelTarget, setCancelTarget] = useState<string | null>(null);
+  const { success, error: toastError } = useToast();
 
   async function load() {
     setLoading(true);
@@ -84,8 +88,15 @@ function BookingsContent() {
     setCreating(false);
   }
 
-  async function handleCancel(id: string) {
-    await api.patch(`/bookings/${id}/cancel`, {});
+  async function handleCancel() {
+    if (!cancelTarget) return;
+    const res = await api.patch(`/bookings/${cancelTarget}/cancel`, {});
+    if (res.status === 'success') {
+      success('Booking cancelled');
+    } else {
+      toastError('Failed to cancel booking');
+    }
+    setCancelTarget(null);
     load();
   }
 
@@ -95,6 +106,17 @@ function BookingsContent() {
   }
 
   return (
+    <>
+    <ConfirmDialog
+      open={cancelTarget !== null}
+      title="Cancel booking?"
+      message="This booking will be marked as cancelled. The slot will become available again."
+      confirmLabel="Yes, cancel booking"
+      cancelLabel="Keep booking"
+      destructive
+      onConfirm={handleCancel}
+      onCancel={() => setCancelTarget(null)}
+    />
     <main className="min-h-dvh px-4 py-8 sm:px-8 max-w-[1200px] mx-auto">
       <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
         <div>
@@ -241,7 +263,7 @@ function BookingsContent() {
                       </Button>
                     )}
                     {['confirmed', 'pending'].includes(b.status) && (
-                      <Button size="sm" variant="danger" onClick={() => handleCancel(b.id)}>
+                      <Button size="sm" variant="danger" onClick={() => setCancelTarget(b.id)}>
                         Cancel
                       </Button>
                     )}
@@ -253,5 +275,6 @@ function BookingsContent() {
         </BentoCard>
       </BentoGrid>
     </main>
+    </>
   );
 }

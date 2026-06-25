@@ -10,68 +10,73 @@ interface KpiCardProps {
   value: number;
   prefix?: string;
   suffix?: string;
-  trend?: number;        // % change, positive = up
+  trend?: number;
   trendLabel?: string;
-  accent?: 'violet' | 'cyan' | 'lime';
-  col?: 1 | 2 | 3 | 4;
+  accent?: 'violet' | 'gold' | 'cyan';
+  col?: 1 | 2 | 3 | 4 | 5 | 6;
   className?: string;
 }
 
-const accentMap = {
-  violet: 'text-[var(--color-violet-light)]',
-  cyan:   'text-[var(--color-cyan-light)]',
-  lime:   'text-[var(--color-lime-light)]',
+const accentColor: Record<'violet' | 'gold' | 'cyan', string> = {
+  violet: 'var(--color-violet-light)',
+  gold:   'var(--color-gold-light)',
+  cyan:   'var(--color-cyan-light)',
 };
 
 function AnimatedNumber({ value, prefix = '', suffix = '' }: { value: number; prefix?: string; suffix?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true });
+  const inView = useInView(ref, { once: true });
   const motionValue = useMotionValue(0);
-  const spring = useSpring(motionValue, { damping: 30, stiffness: 100 });
+  const spring = useSpring(motionValue, { damping: 28, stiffness: 90 });
 
   useEffect(() => {
-    if (isInView) motionValue.set(value);
-  }, [isInView, motionValue, value]);
+    if (inView) motionValue.set(value);
+  }, [inView, motionValue, value]);
 
-  useEffect(() => {
-    return spring.on('change', (v) => {
-      if (ref.current) {
-        ref.current.textContent = `${prefix}${Math.round(v).toLocaleString()}${suffix}`;
-      }
-    });
-  }, [spring, prefix, suffix]);
+  useEffect(() =>
+    spring.on('change', (v) => {
+      if (ref.current) ref.current.textContent = `${prefix}${Math.round(v).toLocaleString()}${suffix}`;
+    }),
+    [spring, prefix, suffix]
+  );
 
   return <span ref={ref}>{prefix}0{suffix}</span>;
 }
 
 export function KpiCard({
-  label,
-  value,
-  prefix = '',
-  suffix = '',
-  trend,
-  trendLabel,
-  accent = 'violet',
-  col = 3,
-  className,
+  label, value, prefix = '', suffix = '',
+  trend, trendLabel, accent = 'violet', col = 3, className,
 }: KpiCardProps) {
-  const trendColor =
-    trend === undefined ? '' :
-    trend > 0 ? 'text-[var(--color-success)]' :
-    trend < 0 ? 'text-[var(--color-danger)]' :
-    'text-[var(--color-text-muted)]';
+  const color = accentColor[accent];
+  const trendUp   = trend !== undefined && trend > 0;
+  const trendDown = trend !== undefined && trend < 0;
 
   return (
     <BentoCard col={col as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12} className={className}>
-      <p className="text-xs font-medium uppercase tracking-widest text-[var(--color-text-muted)] mb-3">
+      <p
+        className="text-xs font-medium uppercase tracking-widest mb-3"
+        style={{ color: 'var(--color-text-muted)', letterSpacing: '0.1em' }}
+      >
         {label}
       </p>
-      <p className={cn('text-4xl font-bold tabular-nums', accentMap[accent])}>
+
+      <p
+        className="text-4xl font-bold tabular-nums mb-1 leading-none"
+        style={{ fontFamily: 'var(--font-display)', color }}
+      >
         <AnimatedNumber value={value} prefix={prefix} suffix={suffix} />
       </p>
+
       {trend !== undefined && (
-        <p className={cn('mt-2 text-xs font-medium', trendColor)}>
-          {trend > 0 ? '▲' : trend < 0 ? '▼' : '●'}{' '}
+        <p
+          className={cn(
+            'text-xs font-medium mt-2',
+            trendUp   && 'text-[var(--color-success)]',
+            trendDown && 'text-[var(--color-danger)]',
+            !trendUp && !trendDown && 'text-[var(--color-text-muted)]'
+          )}
+        >
+          {trendUp ? '↑' : trendDown ? '↓' : '•'}{' '}
           {Math.abs(trend)}%{trendLabel ? ` ${trendLabel}` : ''}
         </p>
       )}

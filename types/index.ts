@@ -180,8 +180,12 @@ export interface DailyReport {
   sessionRevenue: number;
   productRevenue: number;
   totalOrders: number;
+  completedSessions: number;
   newMembers: number;
   loyaltyPointsAwarded: number;
+  loyaltyPointsRedeemed: number;
+  topProducts?: Array<{ productId: string; name: string; qty: number; revenue: number }>;
+  generatedAt: string;
   createdAt: string;
 }
 
