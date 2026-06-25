@@ -13,6 +13,26 @@ import { NoiseBlobBg } from '@/components/three/NoiseBlobBg';
 import { MarketingNav } from '@/components/marketing/MarketingNav';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
 
+// ─── Shared animation primitives ─────────────────────────────────────────────
+const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number];
+
+const SECTION_STAGGER = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.13, delayChildren: 0 } },
+};
+const SECTION_ITEM = {
+  hidden: { opacity: 0, y: 16, scale: 0.88, filter: 'blur(14px)' },
+  show:   { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', transition: { duration: 0.65, ease: EASE } },
+};
+const CARD_ANIM = {
+  hidden: { opacity: 0, y: 24, scale: 0.93, filter: 'blur(14px)' },
+  show:   { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', transition: { duration: 0.65, ease: EASE, staggerChildren: 0.12, delayChildren: 0.1 } },
+};
+const WORD_VARIANT = {
+  hidden: { opacity: 0, scale: 0.7, filter: 'blur(16px)', y: 8 },
+  show:   { opacity: 1, scale: 1, filter: 'blur(0px)', y: 0, transition: { duration: 0.75, ease: EASE } },
+};
+
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 function Hero() {
   const stagger = {
@@ -20,8 +40,12 @@ function Hero() {
     show: { transition: { staggerChildren: 0.1, delayChildren: 0.3 } },
   };
   const item = {
-    hidden: { opacity: 0, y: 28 },
-    show:   { opacity: 1, y: 0, transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] as [number,number,number,number] } },
+    hidden: { opacity: 0, y: 24, scale: 0.85, filter: 'blur(14px)' },
+    show:   { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', transition: { duration: 0.72, ease: EASE } },
+  };
+  const headline = {
+    hidden: {},
+    show:   { transition: { staggerChildren: 0.075, delayChildren: 0 } },
   };
 
   return (
@@ -62,9 +86,9 @@ function Hero() {
             </span>
           </motion.div>
 
-          {/* Display headline */}
+          {/* Display headline — word-by-word zoom+blur reveal */}
           <motion.h1
-            variants={item}
+            variants={headline}
             className="text-gradient-hero mb-6 leading-[1.06] tracking-[-0.03em]"
             style={{
               fontFamily: 'var(--font-display)',
@@ -72,9 +96,17 @@ function Hero() {
               fontWeight: 700,
             }}
           >
-            Run your entertainment
+            {'Run your entertainment'.split(' ').map((word, i) => (
+              <motion.span key={`l0-${i}`} variants={WORD_VARIANT} style={{ display: 'inline-block', marginRight: '0.28em' }}>
+                {word}
+              </motion.span>
+            ))}
             <br />
-            empire from one screen.
+            {'empire from one screen.'.split(' ').map((word, i, arr) => (
+              <motion.span key={`l1-${i}`} variants={WORD_VARIANT} style={{ display: 'inline-block', marginRight: i < arr.length - 1 ? '0.28em' : undefined }}>
+                {word}
+              </motion.span>
+            ))}
           </motion.h1>
 
           {/* Sub-headline */}
@@ -171,28 +203,31 @@ function WhatIsPlayHub() {
     >
       {/* ── Intro copy ── */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        variants={SECTION_STAGGER}
+        initial="hidden"
+        whileInView="show"
         viewport={{ once: true, margin: '-80px' }}
-        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
         className="max-w-2xl mb-16"
       >
-        <Badge variant="violet" className="mb-4">What is PlayHub?</Badge>
-        <h2
+        <motion.div variants={SECTION_ITEM} className="mb-4">
+          <Badge variant="violet">What is PlayHub?</Badge>
+        </motion.div>
+        <motion.h2
           id="whatis-heading"
+          variants={SECTION_ITEM}
           className="text-4xl lg:text-5xl font-bold tracking-tight mb-5 leading-[1.08]"
           style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text-primary)' }}
         >
           The operating system
           <br />
           for entertainment centers.
-        </h2>
-        <p className="text-lg leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+        </motion.h2>
+        <motion.p variants={SECTION_ITEM} className="text-lg leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
           PlayHub is a purpose-built management platform for arcades, gaming lounges, VR venues,
           bowling alleys, and anywhere people come to play. It replaces a drawer full of
           disconnected tools with a single, elegant dashboard — accessible from any device,
           updated in real time, and built to grow with you.
-        </p>
+        </motion.p>
       </motion.div>
 
       {/* ── Three pillars ── */}
@@ -200,10 +235,10 @@ function WhatIsPlayHub() {
         {PILLARS.map(({ title, body, color, checks }, idx) => (
           <motion.div
             key={title}
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 24, scale: 0.95, filter: 'blur(8px)' }}
+            whileInView={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
             viewport={{ once: true, margin: '-60px' }}
-            transition={{ duration: 0.5, delay: idx * 0.1, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.55, delay: idx * 0.1, ease: [0.22, 1, 0.36, 1] }}
           >
             <div
               className="glass-card h-full flex flex-col"
@@ -269,10 +304,10 @@ function VenueShowcase() {
   return (
     <section className="px-6 pb-20 max-w-[1320px] mx-auto" aria-label="Venue showcase">
       <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, y: 24, scale: 0.97, filter: 'blur(6px)' }}
+        whileInView={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
         viewport={{ once: true, margin: '-80px' }}
-        transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         className="relative overflow-hidden"
         style={{
           borderRadius: 'var(--radius-xl)',
@@ -299,26 +334,34 @@ function VenueShowcase() {
           aria-hidden="true"
         />
         {/* text overlay */}
-        <div className="absolute inset-0 flex flex-col justify-center px-10 sm:px-16 max-w-xl">
-          <p
+        <motion.div
+          variants={SECTION_STAGGER}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: '-80px' }}
+          className="absolute inset-0 flex flex-col justify-center px-10 sm:px-16 max-w-xl"
+        >
+          <motion.p
+            variants={SECTION_ITEM}
             className="text-xs font-semibold uppercase tracking-widest mb-3"
             style={{ color: 'var(--color-violet-light)' }}
           >
             Built for venues like this
-          </p>
-          <h2
+          </motion.p>
+          <motion.h2
+            variants={SECTION_ITEM}
             className="text-2xl sm:text-4xl font-bold tracking-tight mb-4 leading-[1.1]"
             style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text-primary)' }}
           >
             Arcades. VR lounges.
             <br />
             Bowling alleys. All of it.
-          </h2>
-          <p className="text-sm sm:text-base leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+          </motion.h2>
+          <motion.p variants={SECTION_ITEM} className="text-sm sm:text-base leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
             PlayHub runs the full operation — from the moment a guest walks in to the
             nightly revenue report sent automatically at close.
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
       </motion.div>
     </section>
   );
@@ -338,10 +381,10 @@ function Features() {
   return (
     <section className="px-6 pb-32 max-w-[1320px] mx-auto" aria-labelledby="features-heading">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, y: 20, scale: 0.96, filter: 'blur(8px)' }}
+        whileInView={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
         viewport={{ once: true, margin: '-80px' }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         className="mb-14 text-center"
       >
         <Badge variant="violet" className="mb-4">Platform</Badge>
@@ -436,7 +479,14 @@ function Features() {
 function FooterCta() {
   return (
     <section className="px-6 pb-24 max-w-[900px] mx-auto text-center" aria-label="Call to action">
-      <div className="glass-card glass-card-violet" style={{ padding: '3.5rem 2.5rem' }}>
+      <motion.div
+        initial={{ opacity: 0, y: 24, scale: 0.96, filter: 'blur(8px)' }}
+        whileInView={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+        viewport={{ once: true, margin: '-80px' }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="glass-card glass-card-violet"
+        style={{ padding: '3.5rem 2.5rem' }}
+      >
         <h2
           className="text-4xl font-bold tracking-tight mb-4"
           style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text-primary)' }}
@@ -454,7 +504,7 @@ function FooterCta() {
             <Button variant="secondary" size="lg">Sign in</Button>
           </Link>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

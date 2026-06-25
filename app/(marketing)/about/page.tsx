@@ -14,10 +14,10 @@ import { Check, ArrowRight, ShoppingCart, Calendar, Users, Package, UserCog, Per
 
 // ─── Animation helpers ─────────────────────────────────────────────────────────
 const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
+  initial: { opacity: 0, y: 24, scale: 0.96, filter: 'blur(6px)' },
+  whileInView: { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' },
   viewport: { once: true, margin: '-60px' },
-  transition: { duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
+  transition: { duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
 });
 
 // ─── Page hero ─────────────────────────────────────────────────────────────────
@@ -27,8 +27,8 @@ function AboutHero() {
     show: { transition: { staggerChildren: 0.12, delayChildren: 0.15 } },
   };
   const item = {
-    hidden: { opacity: 0, y: 24 },
-    show:   { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as [number,number,number,number] } },
+    hidden: { opacity: 0, y: 24, scale: 0.94, filter: 'blur(10px)' },
+    show:   { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] as [number,number,number,number] } },
   };
 
   return (
