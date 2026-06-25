@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { Avatar } from '@/components/ui/Avatar';
 import { api } from '@/lib/api';
+import { useToast } from '@/components/ui/Toast';
 import { Member, ApiSuccess } from '@/types';
 import { motion } from 'framer-motion';
 
@@ -23,6 +24,7 @@ function MembersContent() {
   const [form, setForm] = useState({ name: '', email: '', phone: '' });
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState('');
+  const { success: toastOk, error: toastErr } = useToast();
 
   async function load() {
     setLoading(true);
@@ -36,11 +38,21 @@ function MembersContent() {
   async function handleCreate(e: FormEvent) {
     e.preventDefault();
     setSaving(true);
-    await api.post('/members', form);
-    setShowForm(false);
-    setForm({ name: '', email: '', phone: '' });
-    load();
-    setSaving(false);
+    try {
+      const res = await api.post('/members', form);
+      if (res.status === 'success') {
+        toastOk(`Member "${form.name}" created`);
+        setShowForm(false);
+        setForm({ name: '', email: '', phone: '' });
+        load();
+      } else {
+        toastErr((res as { message: string }).message || 'Failed to create member');
+      }
+    } catch {
+      toastErr('Network error — is the backend running?');
+    } finally {
+      setSaving(false);
+    }
   }
 
   const filtered = members.filter(
@@ -68,7 +80,7 @@ function MembersContent() {
         {showForm && (
           <BentoCard col={12} glow="violet">
             <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>New Member</h2>
-            <form onSubmit={handleCreate} className="grid grid-cols-3 gap-4">
+            <form onSubmit={handleCreate} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <Input label="Name" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} required />
               <Input label="Email" type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} required />
               <Input label="Phone (optional)" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} />
@@ -83,8 +95,8 @@ function MembersContent() {
           ) : filtered.length === 0 ? (
             <p className="text-center py-12" style={{ color: 'var(--color-text-muted)' }}>No members found.</p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <div className="table-scroll">
+              <table className="w-full text-sm" style={{ minWidth: '560px' }}>
                 <thead>
                   <tr style={{ color: 'var(--color-text-muted)' }}>
                     <th className="text-left py-3 px-4 font-semibold uppercase text-xs tracking-widest">Member</th>
@@ -97,7 +109,7 @@ function MembersContent() {
                 <tbody>
                   {filtered.map((m) => (
                     <motion.tr
-                      key={m.id}
+                      key={m._id ?? m.id ?? m.email}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       className="border-t"

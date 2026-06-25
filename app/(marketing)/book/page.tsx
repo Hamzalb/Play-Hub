@@ -122,7 +122,7 @@ export default function BookPage() {
   return (
     <>
       <MarketingNav />
-      <main id="main-content" className="min-h-dvh px-4 py-28 max-w-[720px] mx-auto">
+      <main id="main-content" className="min-h-dvh px-4 pt-20 sm:pt-28 pb-12 max-w-[720px] mx-auto">
         {/* Header */}
         <div className="mb-8">
           <Badge variant="cyan" className="mb-3">Online Booking</Badge>

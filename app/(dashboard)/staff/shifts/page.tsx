@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { Avatar } from '@/components/ui/Avatar';
 import { useToast } from '@/components/ui/Toast';
+import { useBranch } from '@/lib/hooks/useBranch';
 import { api } from '@/lib/api';
 import { ApiSuccess } from '@/types';
 import { Plus, Clock } from '@/components/ui/icons';
@@ -43,20 +44,23 @@ function ShiftsContent() {
   const [staff, setStaff]     = useState<StaffUser[]>([]);
   const [from, setFrom]       = useState(today);
   const [to, setTo]           = useState(today);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving]   = useState(false);
   const [form, setForm]       = useState({ userId: '', scheduledStart: `${today}T09:00`, scheduledEnd: `${today}T17:00`, note: '' });
   const { success, error: toastErr } = useToast();
+  const { branchId } = useBranch();
 
   const load = async () => {
+    if (!branchId) { setLoading(false); return; }
     setLoading(true);
-    const res = await api.get<Shift[]>(`/staff/shifts?from=${from}&to=${to}T23:59`);
+    const res = await api.get<Shift[]>(`/staff/shifts?from=${from}&to=${to}T23:59&branchId=${branchId}`);
     if (res.status === 'success') setShifts((res as ApiSuccess<Shift[]>).data);
+    else toastErr((res as { message: string }).message ?? 'Failed to load shifts');
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, [from, to]);
+  useEffect(() => { load(); }, [from, to, branchId]);
   useEffect(() => {
     api.get<StaffUser[]>('/staff').then((res) => {
       if (res.status === 'success') setStaff((res as ApiSuccess<StaffUser[]>).data);
@@ -66,7 +70,8 @@ function ShiftsContent() {
   async function handleCreate(e: FormEvent) {
     e.preventDefault();
     setSaving(true);
-    const res = await api.post('/staff/shifts', form);
+    if (!branchId) { toastErr('No branch selected'); setSaving(false); return; }
+    const res = await api.post('/staff/shifts', { ...form, branchId });
     if (res.status === 'success') { success('Shift created'); setShowForm(false); load(); }
     else toastErr((res as { message: string }).message);
     setSaving(false);

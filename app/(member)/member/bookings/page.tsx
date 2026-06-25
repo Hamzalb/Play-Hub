@@ -76,7 +76,7 @@ export default function MemberBookingsPage() {
       ) : (
         <div className="flex flex-col gap-3">
           {filtered.map((b, i) => (
-            <motion.div key={b.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+            <motion.div key={b._id ?? b.id ?? b.startTime} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
               className="glass-card flex items-center justify-between gap-4 flex-wrap">
               <div className="flex-1 min-w-0">

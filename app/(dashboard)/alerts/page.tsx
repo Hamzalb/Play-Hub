@@ -7,6 +7,7 @@ import { BentoCard } from '@/components/bento/BentoCard';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { api } from '@/lib/api';
+import { useBranch } from '@/lib/hooks/useBranch';
 import { Alert, AlertSeverity, ApiSuccess } from '@/types';
 import { motion } from 'framer-motion';
 
@@ -21,18 +22,20 @@ export default function AlertsPage() {
 }
 
 function AlertsContent() {
-  const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [alerts, setAlerts]       = useState<Alert[]>([]);
+  const [loading, setLoading]     = useState(false);
   const [showResolved, setShowResolved] = useState(false);
+  const { branchId } = useBranch();
 
   async function load() {
+    if (!branchId) { setLoading(false); return; }
     setLoading(true);
-    const res = await api.get<Alert[]>(`/alerts?resolved=${showResolved}`);
+    const res = await api.get<Alert[]>(`/alerts?resolved=${showResolved}&branchId=${branchId}`);
     if (res.status === 'success') setAlerts((res as ApiSuccess<Alert[]>).data);
     setLoading(false);
   }
 
-  useEffect(() => { load(); }, [showResolved]);
+  useEffect(() => { load(); }, [showResolved, branchId]);
 
   async function ack(id: string) {
     await api.patch(`/alerts/${id}/ack`, {});
@@ -72,7 +75,7 @@ function AlertsContent() {
             </p>
           </BentoCard>
         ) : alerts.map((a) => (
-          <motion.div key={a.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="col-span-12">
+          <motion.div key={a._id ?? a.id ?? a.createdAt} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="col-span-12">
             <BentoCard col={12}>
               <div className="flex items-start justify-between gap-4 flex-wrap">
                 <div className="flex-1">
@@ -90,9 +93,9 @@ function AlertsContent() {
                 {!a.isResolved && (
                   <div className="flex gap-2">
                     {!a.isAcknowledged && (
-                      <Button size="sm" variant="secondary" onClick={() => ack(a.id)}>Acknowledge</Button>
+                      <Button size="sm" variant="secondary" onClick={() => ack(a._id ?? a.id)}>Acknowledge</Button>
                     )}
-                    <Button size="sm" variant="danger" onClick={() => resolve(a.id)}>Resolve</Button>
+                    <Button size="sm" variant="danger" onClick={() => resolve(a._id ?? a.id)}>Resolve</Button>
                   </div>
                 )}
               </div>

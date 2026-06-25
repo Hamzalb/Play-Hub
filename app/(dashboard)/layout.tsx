@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { ProtectedRoute } from '@/components/ui/ProtectedRoute';
+import { BranchProvider, useBranch } from '@/lib/hooks/useBranch';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/utils';
@@ -62,6 +63,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const router = useRouter();
+  const { branchId, branchName, branches, setActiveBranch } = useBranch();
 
   async function handleLogout() {
     onClose?.();
@@ -99,6 +101,44 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
           </button>
         )}
       </div>
+
+      {/* Branch selector — super admin only */}
+      {user?.role === 'super_admin' && branches.length > 0 && (
+        <div className="px-3 py-3 border-b" style={{ borderColor: 'var(--color-border)' }}>
+          <p className="text-xs mb-1.5 uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>
+            Working branch
+          </p>
+          <select
+            value={branchId}
+            onChange={(e) => setActiveBranch(e.target.value)}
+            aria-label="Select active branch"
+            className="w-full text-xs rounded-[var(--radius-md)] px-2.5 py-2 border cursor-pointer transition-colors focus:outline-none"
+            style={{
+              background:   'rgba(255,255,255,0.05)',
+              color:        'var(--color-text-primary)',
+              borderColor:  branchId ? 'rgba(139,92,246,0.4)' : 'var(--color-border)',
+            }}
+          >
+            {branches.map((b) => (
+              <option key={b._id} value={b._id} style={{ background: '#0d1321' }}>
+                {b.name}
+              </option>
+            ))}
+          </select>
+          {branchName && (
+            <p className="text-xs mt-1 truncate" style={{ color: 'var(--color-text-muted)' }}>
+              {branches.find(b => b._id === branchId)?.address ?? ''}
+            </p>
+          )}
+        </div>
+      )}
+      {/* Branch name for non-super-admin */}
+      {user?.role !== 'super_admin' && branchName && (
+        <div className="px-3 py-2.5 border-b" style={{ borderColor: 'var(--color-border)' }}>
+          <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Branch</p>
+          <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{branchName}</p>
+        </div>
+      )}
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 overflow-y-auto" aria-label="Main navigation">
@@ -153,10 +193,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <ProtectedRoute>
-      <div className="flex min-h-dvh">
+      <BranchProvider>
+      <div className="flex min-h-dvh overflow-x-hidden">
         {/* ── Desktop sidebar ───────────────────────────────────────────── */}
         <aside
-          className="hidden lg:flex flex-col w-56 flex-shrink-0 sticky top-0 h-dvh border-r"
+          className="hidden lg:flex flex-col w-56 flex-shrink-0 sticky top-0 h-dvh border-r overflow-y-auto"
           style={{ borderColor: 'var(--color-border)', background: 'rgba(3,5,12,0.6)', backdropFilter: 'blur(20px)' }}
           aria-label="Sidebar navigation"
         >
@@ -221,6 +262,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </main>
         </div>
       </div>
+      </BranchProvider>
     </ProtectedRoute>
   );
 }

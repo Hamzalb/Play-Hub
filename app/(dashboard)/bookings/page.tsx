@@ -10,8 +10,10 @@ import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/Toast';
+import { useBranch } from '@/lib/hooks/useBranch';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Booking, ApiSuccess } from '@/types';
+import Link from 'next/link';
 
 interface AvailabilityZone {
   zone: { _id: string; name: string; type: string; capacity: number };
@@ -42,7 +44,7 @@ function BookingsContent() {
   const [date, setDate] = useState(today);
   const [availability, setAvailability] = useState<AvailabilityZone[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [createForm, setCreateForm] = useState({
     zoneId: '',
@@ -54,29 +56,33 @@ function BookingsContent() {
   const [createError, setCreateError] = useState('');
   const [cancelTarget, setCancelTarget] = useState<string | null>(null);
   const { success, error: toastError } = useToast();
+  const { branchId } = useBranch();
 
   async function load() {
+    if (!branchId) { setLoading(false); return; }
     setLoading(true);
     const [avRes, bkRes] = await Promise.all([
-      api.get<AvailabilityZone[]>(`/bookings/availability?date=${date}`),
-      api.get<Booking[]>(`/bookings?date=${date}`),
+      api.get<AvailabilityZone[]>(`/bookings/availability?date=${date}&branchId=${branchId}`),
+      api.get<Booking[]>(`/bookings?date=${date}&branchId=${branchId}`),
     ]);
     if (avRes.status === 'success') setAvailability((avRes as ApiSuccess<AvailabilityZone[]>).data);
     if (bkRes.status === 'success') setBookings((bkRes as ApiSuccess<Booking[]>).data);
     setLoading(false);
   }
 
-  useEffect(() => { load(); }, [date]);
+  useEffect(() => { load(); }, [date, branchId]);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     setCreating(true);
     setCreateError('');
+    if (!branchId) { setCreateError('No branch selected — pick a branch first'); setCreating(false); return; }
     const res = await api.post('/bookings', {
-      zoneId: createForm.zoneId,
-      startTime: new Date(createForm.startTime).toISOString(),
+      branchId,
+      zoneId:          createForm.zoneId,
+      startTime:       new Date(createForm.startTime).toISOString(),
       durationMinutes: parseInt(createForm.durationMinutes),
-      guestName: createForm.guestName || undefined,
+      guestName:       createForm.guestName || undefined,
     });
     if (res.status !== 'success') {
       setCreateError((res as { message: string }).message);
@@ -125,7 +131,7 @@ function BookingsContent() {
         </div>
         <div className="flex gap-2 items-center flex-wrap">
           <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-40" />
-          <Button onClick={() => setShowCreate((s) => !s)} variant={showCreate ? 'secondary' : 'primary'}>
+          <Button onClick={() => { setShowCreate((s) => !s); if (!showCreate) load(); }} variant={showCreate ? 'secondary' : 'primary'}>
             {showCreate ? 'Cancel' : '+ New Booking'}
           </Button>
         </div>
@@ -138,21 +144,49 @@ function BookingsContent() {
             <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>New Booking</h2>
             <form onSubmit={handleCreate} className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="col-span-2">
-                <label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--color-text-secondary)' }}>Zone</label>
+                <label className="text-sm font-medium mb-1.5 block" style={{ color: 'var(--color-text-secondary)' }}>
+                  Zone {availability.length === 0 && branchId && !loading && (
+                    <span className="ml-1 text-xs" style={{ color: 'var(--color-warning)' }}>
+                      — no zones found for this branch
+                    </span>
+                  )}
+                </label>
                 <select
                   value={createForm.zoneId}
                   onChange={(e) => setCreateForm((f) => ({ ...f, zoneId: e.target.value }))}
                   required
-                  className="w-full rounded-[var(--radius-md)] border px-4 py-2.5 text-sm bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] border-[var(--color-border)]"
+                  disabled={!branchId || loading}
+                  className="w-full rounded-[var(--radius-md)] border px-4 py-2.5 text-sm bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] border-[var(--color-border)] disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                 >
-                  <option value="">Select a zone</option>
+                  <option value="">
+                    {!branchId
+                      ? 'Select a branch first (sidebar)'
+                      : loading
+                        ? 'Loading zones…'
+                        : availability.length === 0
+                          ? 'No zones — add them in Branches page'
+                          : 'Select a zone'}
+                  </option>
                   {availability.map((av) => (
-                    <option key={av.zone._id} value={av.zone._id}>
-                      {av.zone.name} ({av.available} available)
+                    <option key={av.zone._id} value={av.zone._id} disabled={av.available === 0}>
+                      {av.zone.name} — {av.available > 0 ? `${av.available} available` : 'Full'}
                     </option>
                   ))}
                 </select>
               </div>
+
+              {/* No-zones helper */}
+              {branchId && !loading && availability.length === 0 && (
+                <div className="col-span-4 rounded-[var(--radius-md)] px-4 py-3 text-sm border"
+                  style={{ background: 'rgba(248,113,113,0.07)', borderColor: 'rgba(248,113,113,0.25)', color: 'var(--color-danger)' }}>
+                  This branch has no zones.{' '}
+                  <Link href="/branches" className="font-semibold underline" style={{ color: 'var(--color-danger)' }}>
+                    Go to Branches → Manage zones
+                  </Link>{' '}
+                  to add stations before booking.
+                </div>
+              )}
+
               <Input
                 label="Start time"
                 type="datetime-local"
@@ -235,7 +269,7 @@ function BookingsContent() {
             <div className="flex flex-col gap-3 overflow-auto max-h-96">
               {bookings.map((b) => (
                 <motion.div
-                  key={b.id}
+                  key={b._id ?? b.id ?? b.startTime}
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
                   className="flex items-center justify-between gap-4 p-3 rounded-[var(--radius-md)] border"
@@ -258,12 +292,12 @@ function BookingsContent() {
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <Badge variant={STATUS_COLORS[b.status as BookingStatus]}>{b.status}</Badge>
                     {b.status === 'confirmed' && (
-                      <Button size="sm" variant="secondary" onClick={() => handleCheckIn(b.id)}>
+                      <Button size="sm" variant="secondary" onClick={() => handleCheckIn(b._id ?? b.id)}>
                         Check In
                       </Button>
                     )}
                     {['confirmed', 'pending'].includes(b.status) && (
-                      <Button size="sm" variant="danger" onClick={() => setCancelTarget(b.id)}>
+                      <Button size="sm" variant="danger" onClick={() => setCancelTarget(b._id ?? b.id)}>
                         Cancel
                       </Button>
                     )}

@@ -71,7 +71,7 @@ export default function MemberLoyaltyPage() {
       </div>
 
       {/* Tiers */}
-      <div className="grid grid-cols-3 gap-3 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
         {[
           { tier: 'Standard', min: 0,    max: 499,  color: 'muted'   as const },
           { tier: 'Silver',   min: 500,  max: 1999, color: 'cyan'    as const },

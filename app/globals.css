@@ -84,9 +84,10 @@
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  scroll-behavior: smooth;
   text-rendering: optimizeLegibility;
 }
+html:not([data-scroll-behavior]) { scroll-behavior: smooth; }
+[data-scroll-behavior="smooth"]  { scroll-behavior: smooth; }
 
 body {
   background-color: var(--color-base);
@@ -346,11 +347,52 @@ select, label { touch-action: manipulation; }
   }
 }
 
-/* ─── Responsive bento collapse ─────────────────────────────────────────────
-   Below md: all cards go full-width.                                          */
+/* ─── Responsive bento grid ─────────────────────────────────────────────────
+   Tablet  768–1023px  : large spans collapse, small/medium stay at half-width
+   Mobile  <768px      : everything full-width, no row-spans                   */
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Cancel row spans — they look wrong when cards reflow */
+  .bento-grid > * { grid-row: span 1 !important; }
+
+  /* Very large spans → full width */
+  .bento-grid > .col-span-7,
+  .bento-grid > .col-span-8,
+  .bento-grid > .col-span-9,
+  .bento-grid > .col-span-10,
+  .bento-grid > .col-span-11 { grid-column: span 12 !important; }
+
+  /* Odd / medium spans → half width */
+  .bento-grid > .col-span-5 { grid-column: span 6  !important; }
+}
+
 @media (max-width: 767px) {
   .bento-grid > * {
     grid-column: span 12 !important;
     grid-row: span 1 !important;
   }
 }
+
+/* ─── Raw responsive col-span utilities ─────────────────────────────────────
+   Used in places where class names are built as conditional strings.
+   Mirrors what Tailwind generates for md:col-span-N / sm:col-span-N.          */
+@media (min-width: 768px) {
+  .md\:col-span-3  { grid-column: span 3; }
+  .md\:col-span-4  { grid-column: span 4; }
+  .md\:col-span-6  { grid-column: span 6; }
+  .md\:col-span-12 { grid-column: span 12; }
+}
+@media (min-width: 640px) {
+  .sm\:col-span-6  { grid-column: span 6; }
+  .sm\:col-span-12 { grid-column: span 12; }
+}
+
+/* ─── Table responsive wrapper ───────────────────────────────────────────────  */
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.table-scroll table { min-width: 600px; width: 100%; }
+
+/* ─── Mobile-only helpers ────────────────────────────────────────────────────  */
+.hide-mobile  { display: none; }
+@media (min-width: 768px) { .hide-mobile  { display: unset; } }
+.hide-desktop { display: unset; }
+@media (min-width: 1024px) { .hide-desktop { display: none !important; } }

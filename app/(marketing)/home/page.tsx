@@ -47,7 +47,7 @@ function Hero() {
       />
 
       {/* ── Text content — centered, above blobs ── */}
-      <div className="relative z-10 w-full text-center px-6 sm:px-10 pt-24 pb-16 max-w-4xl mx-auto">
+      <div className="relative z-10 w-full text-center px-4 sm:px-10 pt-20 sm:pt-24 pb-12 sm:pb-16 max-w-4xl mx-auto">
         <motion.div variants={stagger} initial="hidden" animate="show">
           {/* Chip */}
           <motion.div variants={item} className="mb-7 flex justify-center">
@@ -67,7 +67,7 @@ function Hero() {
             className="text-gradient-hero mb-6 leading-[1.06] tracking-[-0.03em]"
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(2.75rem, 7vw, 5.5rem)',
+              fontSize: 'clamp(2rem, 6vw, 5.5rem)',
               fontWeight: 700,
             }}
           >

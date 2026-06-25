@@ -10,33 +10,39 @@ import { BarChart } from '@/components/charts/BarChart';
 import { SkeletonCard } from '@/components/ui/Skeleton';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/Toast';
+import { useBranch } from '@/lib/hooks/useBranch';
 import { DailyReport, ApiSuccess } from '@/types';
 import { BarChart2, TrendingUp } from '@/components/ui/icons';
 
 export default function ReportsPage() {
   const [reports, setReports] = useState<DailyReport[]>([]);
   const [selected, setSelected] = useState<DailyReport | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const { success, error: toastError } = useToast();
+  const { branchId } = useBranch();
 
   async function load() {
+    if (!branchId) { setLoading(false); return; }
     setLoading(true);
-    const res = await api.get<DailyReport[]>('/reports');
+    const res = await api.get<DailyReport[]>(`/reports?branchId=${branchId}`);
     if (res.status === 'success') {
       const data = (res as ApiSuccess<DailyReport[]>).data;
       setReports(data);
       if (data.length > 0) setSelected(data[0]!);
+    } else {
+      toastError((res as { message: string }).message ?? 'Failed to load reports');
     }
     setLoading(false);
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [branchId]);
 
   async function handleGenerate() {
+    if (!branchId) { toastError('No branch selected — choose a branch first'); return; }
     setGenerating(true);
     try {
-      const res = await api.post('/reports/generate', { date: new Date().toISOString().slice(0, 10) });
+      const res = await api.post('/reports/generate', { branchId, date: new Date().toISOString().slice(0, 10) });
       if (res.status === 'success') {
         success("Today's report generated", 'Reports');
         load();
@@ -105,15 +111,15 @@ export default function ReportsPage() {
             </h2>
             <ul role="list" className="flex flex-row lg:flex-col gap-2 overflow-x-auto pb-2 lg:pb-0">
               {reports.map((r) => (
-                <li key={r.id}>
+                <li key={r._id ?? r.id ?? r.date}>
                   <button
                     onClick={() => setSelected(r)}
-                    aria-current={selected?.id === r.id ? 'true' : undefined}
+                    aria-current={(selected?._id ?? selected?.id) === (r._id ?? r.id) ? 'true' : undefined}
                     className="w-full text-left px-4 py-3 rounded-[var(--radius-md)] border transition-all cursor-pointer whitespace-nowrap"
                     style={{
-                      background: selected?.id === r.id ? 'var(--color-violet-dim)' : 'rgba(255,255,255,0.025)',
-                      borderColor: selected?.id === r.id ? 'rgba(139,92,246,0.3)' : 'var(--color-border)',
-                      color: selected?.id === r.id ? 'var(--color-violet-light)' : 'var(--color-text-primary)',
+                      background: (selected?._id ?? selected?.id) === (r._id ?? r.id) ? 'var(--color-violet-dim)' : 'rgba(255,255,255,0.025)',
+                      borderColor: (selected?._id ?? selected?.id) === (r._id ?? r.id) ? 'rgba(139,92,246,0.3)' : 'var(--color-border)',
+                      color: (selected?._id ?? selected?.id) === (r._id ?? r.id) ? 'var(--color-violet-light)' : 'var(--color-text-primary)',
                     }}
                   >
                     <p className="text-sm font-medium">{r.date}</p>
@@ -129,7 +135,7 @@ export default function ReportsPage() {
           {/* Report detail */}
           {selected && (
             <motion.div
-              key={selected.id}
+              key={selected._id ?? selected.id ?? selected.date}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}

@@ -66,6 +66,7 @@ export type BookingStatus = 'pending' | 'confirmed' | 'active' | 'completed' | '
 
 export interface Booking {
   id: string;
+  _id?: string;
   branchId: string;
   zoneId: string;
   memberId?: string;
@@ -84,6 +85,7 @@ export interface Booking {
 
 export interface Member {
   id: string;
+  _id?: string;
   companyId: string;
   name: string;
   email: string;
@@ -110,6 +112,7 @@ export interface SubscriptionPlan {
 
 export interface Product {
   id: string;
+  _id?: string;
   branchId: string;
   name: string;
   category: 'snack' | 'drink' | 'merchandise' | 'other';
@@ -160,6 +163,7 @@ export type AlertSeverity = 'info' | 'warning' | 'critical';
 
 export interface Alert {
   id: string;
+  _id?: string;
   branchId: string;
   type: AlertType;
   severity: AlertSeverity;
@@ -174,6 +178,7 @@ export interface Alert {
 
 export interface DailyReport {
   id: string;
+  _id?: string;
   branchId: string;
   date: string;
   totalRevenue: number;

@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { Avatar } from '@/components/ui/Avatar';
 import { api } from '@/lib/api';
+import { useToast } from '@/components/ui/Toast';
+import { useBranch } from '@/lib/hooks/useBranch';
 import { ApiSuccess } from '@/types';
 
 interface StaffUser {
@@ -24,16 +26,19 @@ export default function StaffPage() {
 }
 
 function StaffContent() {
-  const [staff, setStaff] = useState<StaffUser[]>([]);
+  const [staff, setStaff]   = useState<StaffUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'staff' });
+  const [form, setForm]     = useState({ name: '', email: '', password: '', role: 'staff' });
   const [saving, setSaving] = useState(false);
+  const { branchId }        = useBranch();
+  const { success: toastOk, error: toastErr } = useToast();
 
   async function load() {
     setLoading(true);
     const res = await api.get<StaffUser[]>('/staff');
     if (res.status === 'success') setStaff((res as ApiSuccess<StaffUser[]>).data);
+    else toastErr((res as { message: string }).message ?? 'Failed to load staff');
     setLoading(false);
   }
 
@@ -41,12 +46,24 @@ function StaffContent() {
 
   async function handleCreate(e: FormEvent) {
     e.preventDefault();
+    if (!branchId) { toastErr('No branch selected — choose a branch first'); return; }
+    if (form.password.length < 8) { toastErr('Password must be at least 8 characters'); return; }
     setSaving(true);
-    await api.post('/staff', form);
-    setShowForm(false);
-    setForm({ name: '', email: '', password: '', role: 'staff' });
-    load();
-    setSaving(false);
+    try {
+      const res = await api.post('/staff', { ...form, branchId });
+      if (res.status === 'success') {
+        toastOk(`Staff member "${form.name}" created`);
+        setShowForm(false);
+        setForm({ name: '', email: '', password: '', role: 'staff' });
+        load();
+      } else {
+        toastErr((res as { message: string }).message || 'Failed to create staff member');
+      }
+    } catch {
+      toastErr('Network error — is the backend running?');
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -65,7 +82,7 @@ function StaffContent() {
         {showForm && (
           <BentoCard col={12} glow="gold">
             <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>New Staff Member</h2>
-            <form onSubmit={handleCreate} className="grid grid-cols-2 gap-4">
+            <form onSubmit={handleCreate} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input label="Name" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} required />
               <Input label="Email" type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} required />
               <Input label="Password" type="password" value={form.password} onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))} required hint="Min 8 characters" />

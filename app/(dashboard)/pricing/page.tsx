@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { api } from '@/lib/api';
+import { useToast } from '@/components/ui/Toast';
+import { useBranch } from '@/lib/hooks/useBranch';
 import { ApiSuccess } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -33,29 +35,26 @@ export default function PricingPage() {
 }
 
 function PricingContent() {
-  const [rules, setRules] = useState<PricingRule[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [rules, setRules]     = useState<PricingRule[]>([]);
+  const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({
-    name: '',
-    multiplier: '1.5',
-    daysOfWeek: [] as number[],
-    startHour: '18',
-    endHour: '22',
-    isHoliday: false,
-    priority: '0',
+  const [form, setForm]       = useState({
+    name: '', multiplier: '1.5', daysOfWeek: [] as number[],
+    startHour: '18', endHour: '22', isHoliday: false, priority: '0',
   });
+  const { branchId } = useBranch();
+  const { success: toastOk, error: toastErr } = useToast();
 
   async function loadRules() {
+    if (!branchId) { setLoading(false); return; }
     setLoading(true);
-    const res = await api.get<PricingRule[]>('/pricing/rules');
-    if (res.status === 'success') {
-      setRules((res as ApiSuccess<PricingRule[]>).data);
-    }
+    const res = await api.get<PricingRule[]>(`/pricing/rules?branchId=${branchId}`);
+    if (res.status === 'success') setRules((res as ApiSuccess<PricingRule[]>).data);
+    else toastErr((res as { message: string }).message ?? 'Failed to load rules');
     setLoading(false);
   }
 
-  useEffect(() => { loadRules(); }, []);
+  useEffect(() => { loadRules(); }, [branchId]);
 
   function toggleDay(d: number) {
     setForm((f) => ({
@@ -66,32 +65,43 @@ function PricingContent() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    if (!branchId) { toastErr('No branch selected — choose a branch first'); return; }
     const dto = {
-      name: form.name,
+      branchId,
+      name:       form.name,
       multiplier: parseFloat(form.multiplier),
       daysOfWeek: form.daysOfWeek,
       timeWindows: form.startHour !== '' ? [{
-        startHour: parseInt(form.startHour),
-        startMinute: 0,
-        endHour: parseInt(form.endHour),
-        endMinute: 0,
+        startHour: parseInt(form.startHour), startMinute: 0,
+        endHour:   parseInt(form.endHour),   endMinute:   0,
       }] : [],
       isHoliday: form.isHoliday,
-      priority: parseInt(form.priority),
+      priority:  parseInt(form.priority),
     };
-    await api.post('/pricing/rules', dto);
-    setShowForm(false);
-    setForm({ name: '', multiplier: '1.5', daysOfWeek: [], startHour: '18', endHour: '22', isHoliday: false, priority: '0' });
-    loadRules();
+    try {
+      const res = await api.post('/pricing/rules', dto);
+      if (res.status === 'success') {
+        toastOk(`Rule "${form.name}" created`);
+        setShowForm(false);
+        setForm({ name: '', multiplier: '1.5', daysOfWeek: [], startHour: '18', endHour: '22', isHoliday: false, priority: '0' });
+        loadRules();
+      } else {
+        toastErr((res as { message: string }).message || 'Failed to create rule');
+      }
+    } catch { toastErr('Network error'); }
   }
 
   async function toggleActive(rule: PricingRule) {
-    await api.patch(`/pricing/rules/${rule._id}`, { isActive: !rule.isActive });
+    const res = await api.patch(`/pricing/rules/${rule._id}`, { isActive: !rule.isActive });
+    if (res.status === 'success') toastOk(`Rule ${rule.isActive ? 'disabled' : 'enabled'}`);
+    else toastErr((res as { message: string }).message ?? 'Failed');
     loadRules();
   }
 
   async function deleteRule(id: string) {
-    await api.delete(`/pricing/rules/${id}`);
+    const res = await api.delete(`/pricing/rules/${id}`);
+    if (res.status === 'success') toastOk('Rule deleted');
+    else toastErr((res as { message: string }).message ?? 'Failed');
     loadRules();
   }
 

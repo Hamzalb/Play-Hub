@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { api } from '@/lib/api';
+import { useToast } from '@/components/ui/Toast';
+import { useBranch } from '@/lib/hooks/useBranch';
 import { Product, ApiSuccess } from '@/types';
 
 export default function InventoryPage() {
@@ -16,34 +18,50 @@ export default function InventoryPage() {
 
 function InventoryContent() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading]   = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ name: '', category: 'snack', price: '', costPrice: '', stock: '', reorderThreshold: '5' });
-  const [saving, setSaving] = useState(false);
+  const [form, setForm]         = useState({ name: '', category: 'snack', price: '', costPrice: '', stock: '', reorderThreshold: '5' });
+  const [saving, setSaving]     = useState(false);
+  const { branchId }            = useBranch();
+  const { success: toastOk, error: toastErr } = useToast();
 
   async function load() {
+    if (!branchId) { setLoading(false); return; }
     setLoading(true);
-    const res = await api.get<Product[]>('/inventory/products');
+    const res = await api.get<Product[]>(`/inventory/products?branchId=${branchId}`);
     if (res.status === 'success') setProducts((res as ApiSuccess<Product[]>).data);
+    else toastErr((res as { message: string }).message ?? 'Failed to load products');
     setLoading(false);
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [branchId]);
 
   async function handleCreate(e: FormEvent) {
     e.preventDefault();
+    if (!branchId) { toastErr('No branch selected — choose a branch first'); return; }
     setSaving(true);
-    await api.post('/inventory/products', {
-      ...form,
-      price: parseFloat(form.price),
-      costPrice: parseFloat(form.costPrice),
-      stock: parseInt(form.stock),
-      reorderThreshold: parseInt(form.reorderThreshold),
-    });
-    setShowForm(false);
-    setForm({ name: '', category: 'snack', price: '', costPrice: '', stock: '', reorderThreshold: '5' });
-    load();
-    setSaving(false);
+    try {
+      const res = await api.post('/inventory/products', {
+        ...form,
+        branchId,
+        price:            parseFloat(form.price),
+        costPrice:        parseFloat(form.costPrice),
+        stock:            parseInt(form.stock),
+        reorderThreshold: parseInt(form.reorderThreshold),
+      });
+      if (res.status === 'success') {
+        toastOk(`Product "${form.name}" added`);
+        setShowForm(false);
+        setForm({ name: '', category: 'snack', price: '', costPrice: '', stock: '', reorderThreshold: '5' });
+        load();
+      } else {
+        toastErr((res as { message: string }).message || 'Failed to add product');
+      }
+    } catch {
+      toastErr('Network error — is the backend running?');
+    } finally {
+      setSaving(false);
+    }
   }
 
   const catColor = (c: string) => c === 'drink' ? 'cyan' : c === 'snack' ? 'gold' : 'muted';
@@ -90,7 +108,7 @@ function InventoryContent() {
         {loading ? (
           <BentoCard col={12}><p style={{ color: 'var(--color-text-muted)' }}>Loading…</p></BentoCard>
         ) : products.map((p) => (
-          <BentoCard key={p.id} col={3}>
+          <BentoCard key={p._id ?? p.id ?? p.name} col={3}>
             <div className="flex items-start justify-between mb-3">
               <Badge variant={catColor(p.category) as 'cyan' | 'gold' | 'muted'}>{p.category}</Badge>
               <Badge variant={p.stock <= p.reorderThreshold ? 'danger' : 'success'}>

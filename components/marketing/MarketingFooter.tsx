@@ -86,7 +86,7 @@ export function MarketingFooter() {
     <footer aria-label="Site footer">
       {/* ── Main grid ── */}
       <div className="px-6 pt-20 pb-12 sm:px-10 lg:px-16 max-w-[1320px] mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-12">
 
           {/* Brand column — spans 1 (or 2 on md) */}
           <motion.div
@@ -94,7 +94,7 @@ export function MarketingFooter() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="lg:col-span-1"
+            className="col-span-2 sm:col-span-2 md:col-span-3 lg:col-span-1"
           >
             {/* Logo */}
             <Link href="/home" className="flex items-center gap-2.5 mb-5" aria-label="PlayHub home">

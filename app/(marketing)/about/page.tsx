@@ -21,46 +21,65 @@ const fadeUp = (delay = 0) => ({
 
 // ─── Page hero ─────────────────────────────────────────────────────────────────
 function AboutHero() {
+  const stagger = {
+    hidden: {},
+    show: { transition: { staggerChildren: 0.12, delayChildren: 0.15 } },
+  };
+  const item = {
+    hidden: { opacity: 0, y: 24 },
+    show:   { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as [number,number,number,number] } },
+  };
+
   return (
-    <section className="relative min-h-[70vh] flex items-end pb-20 px-6 sm:px-10 lg:px-16 overflow-hidden">
-      {/* Ambient gradient — no 3D on interior pages */}
+    <section
+      className="relative flex flex-col justify-end overflow-hidden"
+      style={{ minHeight: '80vh', paddingTop: 'clamp(6rem, 14vw, 10rem)', paddingBottom: 'clamp(3rem, 6vw, 5rem)' }}
+    >
+      {/* Ambient gradient */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background: `
-            radial-gradient(ellipse 80% 60% at 30% 40%, rgba(139,92,246,0.12) 0%, transparent 65%),
-            radial-gradient(ellipse 60% 50% at 75% 60%, rgba(34,211,238,0.08) 0%, transparent 65%)
+            radial-gradient(ellipse 80% 60% at 25% 40%, rgba(139,92,246,0.14) 0%, transparent 65%),
+            radial-gradient(ellipse 60% 50% at 75% 60%, rgba(34,211,238,0.09) 0%, transparent 65%)
           `,
         }}
         aria-hidden="true"
       />
 
-      <div className="relative max-w-[1320px] mx-auto w-full">
-        <motion.div {...fadeUp(0.1)}>
-          <Badge variant="violet" className="mb-6">About PlayHub</Badge>
+      <motion.div
+        className="relative max-w-[1320px] mx-auto w-full px-6 sm:px-10 lg:px-16"
+        variants={stagger}
+        initial="hidden"
+        animate="show"
+      >
+        <motion.div variants={item}>
+          <Badge variant="violet" className="mb-5 sm:mb-6">About PlayHub</Badge>
         </motion.div>
+
         <motion.h1
-          {...fadeUp(0.2)}
-          className="text-gradient-hero mb-6 leading-[1.06] tracking-[-0.03em]"
+          variants={item}
+          className="text-gradient-hero mb-5 sm:mb-6 leading-[1.06] tracking-[-0.03em]"
           style={{
             fontFamily: 'var(--font-display)',
-            fontSize:   'clamp(2.5rem, 6vw, 5rem)',
+            fontSize:   'clamp(1.875rem, 5vw, 5rem)',
             fontWeight: 700,
             maxWidth:   '14ch',
           }}
         >
           The operating system for modern entertainment.
         </motion.h1>
+
         <motion.p
-          {...fadeUp(0.3)}
-          className="text-lg leading-relaxed"
+          variants={item}
+          className="text-base sm:text-lg leading-relaxed"
           style={{ color: 'var(--color-text-secondary)', maxWidth: '52ch' }}
         >
           PlayHub was created to give entertainment centers the professional management tools
           they deserve — tools that are as powerful as enterprise software and as intuitive
           as a consumer app.
         </motion.p>
-      </div>
+      </motion.div>
     </section>
   );
 }
@@ -211,7 +230,11 @@ function Platform() {
 
       <BentoGrid>
         {MODULES.map(({ Icon, label, desc, col }, idx) => (
-          <motion.div key={label} {...fadeUp(idx * 0.05)} className={`col-span-12 md:col-span-${col}`}>
+          <motion.div
+            key={label}
+            {...fadeUp(idx * 0.05)}
+            className={col === 4 ? 'col-span-12 md:col-span-4' : col === 3 ? 'col-span-12 md:col-span-3' : 'col-span-12'}
+          >
             <BentoCard col={12}>
               <div
                 className="h-10 w-10 rounded-[var(--radius-md)] flex items-center justify-center mb-4"
