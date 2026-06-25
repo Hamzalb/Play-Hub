@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { SkeletonRow } from '@/components/ui/Skeleton';
+import { MemberNav } from '@/components/member/MemberNav';
 import { api } from '@/lib/api';
 import { ApiSuccess, Booking } from '@/types';
 import { Calendar } from '@/components/ui/icons';
@@ -35,13 +36,12 @@ export default function MemberBookingsPage() {
   );
 
   return (
+    <>
+    <MemberNav />
     <main className="min-h-dvh px-4 py-12 sm:px-8 max-w-[800px] mx-auto">
-      <div className="flex items-center gap-3 mb-2">
-        <Link href="/member"><Button variant="ghost" size="sm">← Portal</Button></Link>
-        <h1 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text-primary)' }}>
-          My Bookings
-        </h1>
-      </div>
+      <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text-primary)' }}>
+        My Bookings
+      </h1>
 
       {/* Filter tabs */}
       <div className="flex gap-2 mb-6">
@@ -99,5 +99,6 @@ export default function MemberBookingsPage() {
         </div>
       )}
     </main>
+    </>
   );
 }

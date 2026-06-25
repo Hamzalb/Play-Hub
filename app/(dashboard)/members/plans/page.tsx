@@ -11,13 +11,20 @@ import { Badge } from '@/components/ui/Badge';
 import { useToast } from '@/components/ui/Toast';
 import { api } from '@/lib/api';
 import { ApiSuccess } from '@/types';
-import { Plus, Check } from '@/components/ui/icons';
+import { Plus, Check, Clock } from '@/components/ui/icons';
 import Link from 'next/link';
 
 interface Plan {
   _id: string; name: string; price: number;
   billingPeriodDays: number; features: string[];
   loyaltyMultiplier: number; isActive: boolean;
+}
+
+interface PendingSub {
+  _id: string;
+  createdAt: string;
+  memberId: { _id: string; name: string; email: string };
+  planId: { _id: string; name: string; price: number; billingPeriodDays: number };
 }
 
 export default function PlansPage() {
@@ -29,18 +36,24 @@ export default function PlansPage() {
 }
 
 function PlansContent() {
-  const [plans, setPlans]     = useState<Plan[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [saving, setSaving]   = useState(false);
-  const [featInput, setFeatInput] = useState('');
+  const [plans, setPlans]           = useState<Plan[]>([]);
+  const [pending, setPending]       = useState<PendingSub[]>([]);
+  const [loading, setLoading]       = useState(true);
+  const [showForm, setShowForm]     = useState(false);
+  const [saving, setSaving]         = useState(false);
+  const [approving, setApproving]   = useState<string | null>(null);
+  const [featInput, setFeatInput]   = useState('');
   const [form, setForm] = useState({ name: '', price: '', billingPeriodDays: '30', loyaltyMultiplier: '1', features: [] as string[] });
   const { success, error: toastErr } = useToast();
 
   const load = async () => {
     setLoading(true);
-    const res = await api.get<Plan[]>('/members/plans');
-    if (res.status === 'success') setPlans((res as ApiSuccess<Plan[]>).data);
+    const [plansRes, pendingRes] = await Promise.all([
+      api.get<Plan[]>('/members/plans'),
+      api.get<PendingSub[]>('/members/subscriptions/pending'),
+    ]);
+    if (plansRes.status === 'success')   setPlans((plansRes as ApiSuccess<Plan[]>).data);
+    if (pendingRes.status === 'success') setPending((pendingRes as ApiSuccess<PendingSub[]>).data);
     setLoading(false);
   };
 
@@ -75,6 +88,18 @@ function PlansContent() {
     setSaving(false);
   }
 
+  async function handleApprove(subId: string) {
+    setApproving(subId);
+    const res = await api.patch(`/members/subscriptions/${subId}/approve`, {});
+    if (res.status === 'success') {
+      success('Subscription approved — member is now active');
+      setPending((p) => p.filter((s) => s._id !== subId));
+    } else {
+      toastErr((res as { message: string }).message);
+    }
+    setApproving(null);
+  }
+
   return (
     <div className="px-4 py-8 sm:px-6 lg:px-8 max-w-[1100px] mx-auto">
       <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
@@ -93,8 +118,54 @@ function PlansContent() {
       </div>
 
       <BentoGrid>
-        {showForm && (
+        {/* Pending approval requests */}
+        {!loading && pending.length > 0 && (
           <BentoCard col={12} glow="gold">
+            <div className="flex items-center gap-2 mb-4">
+              <Clock size={16} style={{ color: 'var(--color-gold)' }} />
+              <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                Pending Approval — Cash Payment
+              </h2>
+              <Badge variant="gold">{pending.length}</Badge>
+            </div>
+            <p className="text-xs mb-4" style={{ color: 'var(--color-text-muted)' }}>
+              Collect cash from the member, then click Approve to activate their subscription.
+            </p>
+            <div className="flex flex-col gap-3">
+              {pending.map((sub) => (
+                <motion.div
+                  key={sub._id}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="flex items-center justify-between gap-4 flex-wrap p-3 rounded-[var(--radius-md)]"
+                  style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.18)' }}
+                >
+                  <div>
+                    <p className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                      {sub.memberId?.name}
+                      <span className="ml-2 font-normal" style={{ color: 'var(--color-text-muted)' }}>{sub.memberId?.email}</span>
+                    </p>
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+                      Plan: <strong>{sub.planId?.name}</strong> · ${sub.planId?.price}/{sub.planId?.billingPeriodDays}d ·
+                      Requested {new Date(sub.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    loading={approving === sub._id}
+                    onClick={() => handleApprove(sub._id)}
+                  >
+                    Approve
+                  </Button>
+                </motion.div>
+              ))}
+            </div>
+          </BentoCard>
+        )}
+
+        {showForm && (
+          <BentoCard col={12} glow="violet">
             <h2 className="text-lg font-semibold mb-5" style={{ color: 'var(--color-text-primary)' }}>Create subscription plan</h2>
             <form onSubmit={handleCreate} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input label="Plan name" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} required showRequired placeholder="e.g. Pro Member" />
@@ -102,7 +173,6 @@ function PlansContent() {
               <Input label="Billing period (days)" type="number" value={form.billingPeriodDays} onChange={(e) => setForm((f) => ({ ...f, billingPeriodDays: e.target.value }))} />
               <Input label="Loyalty multiplier" type="number" step="0.1" value={form.loyaltyMultiplier} onChange={(e) => setForm((f) => ({ ...f, loyaltyMultiplier: e.target.value }))} hint="1 = normal, 2 = double points" />
 
-              {/* Features */}
               <div className="sm:col-span-2">
                 <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: 'var(--color-text-muted)' }}>Features</label>
                 <div className="flex gap-2 mb-2">

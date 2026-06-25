@@ -9,6 +9,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Calendar, DollarSign, TrendingUp, Clock } from '@/components/ui/icons';
 import { BentoGrid } from '@/components/bento/BentoGrid';
 import { BentoCard } from '@/components/bento/BentoCard';
+import { MemberNav } from '@/components/member/MemberNav';
 
 const PORTAL_LINKS = [
   { href: '/member/bookings',     label: 'My Bookings',       Icon: Calendar,    desc: 'View upcoming & past sessions',     color: 'violet' },
@@ -18,7 +19,7 @@ const PORTAL_LINKS = [
 ] as const;
 
 export default function MemberPortalPage() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   if (!user) {
     return (
@@ -30,10 +31,12 @@ export default function MemberPortalPage() {
   }
 
   return (
+    <>
+    <MemberNav />
     <main className="min-h-dvh px-4 py-12 sm:px-8 max-w-[900px] mx-auto">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        className="flex items-center justify-between mb-10 gap-4 flex-wrap">
+        className="flex items-center gap-4 mb-10 flex-wrap">
         <div className="flex items-center gap-4">
           <Avatar name={user.name} size="lg" />
           <div>
@@ -43,7 +46,6 @@ export default function MemberPortalPage() {
             <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{user.email}</p>
           </div>
         </div>
-        <Button variant="ghost" size="sm" onClick={logout}>Sign out</Button>
       </motion.div>
 
       {/* Quick links */}
@@ -88,5 +90,6 @@ export default function MemberPortalPage() {
         </BentoCard>
       </BentoGrid>
     </main>
+    </>
   );
 }

@@ -11,6 +11,7 @@ import { useAuth } from '@/lib/auth';
 import { useToast } from '@/components/ui/Toast';
 import { Avatar } from '@/components/ui/Avatar';
 import { Settings } from '@/components/ui/icons';
+import { api } from '@/lib/api';
 
 export default function SettingsPage() {
   return (
@@ -21,33 +22,42 @@ export default function SettingsPage() {
 }
 
 function SettingsContent() {
-  const { user } = useAuth();
-  const { success } = useToast();
+  const { user, refresh } = useAuth();
+  const { success, error: toastErr } = useToast();
 
   const [profile, setProfile] = useState({ name: user?.name ?? '', email: user?.email ?? '' });
   const [pw, setPw] = useState({ current: '', next: '', confirm: '' });
-  const [saving, setSaving] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [savingPw, setSavingPw] = useState(false);
 
   const role = user?.role ?? '';
   const roleLabel = role.replace('_', ' ');
 
   async function saveProfile(e: FormEvent) {
     e.preventDefault();
-    setSaving(true);
-    // In a full implementation this would PATCH /auth/me or /staff/:id
-    await new Promise((r) => setTimeout(r, 600));
-    success('Profile updated');
-    setSaving(false);
+    setSavingProfile(true);
+    const res = await api.patch('/auth/me', { name: profile.name, email: profile.email });
+    if (res.status === 'success') {
+      success('Profile updated');
+      await refresh();
+    } else {
+      toastErr((res as { message: string }).message ?? 'Failed to update profile');
+    }
+    setSavingProfile(false);
   }
 
   async function changePassword(e: FormEvent) {
     e.preventDefault();
     if (pw.next !== pw.confirm) return;
-    setSaving(true);
-    await new Promise((r) => setTimeout(r, 600));
-    success('Password changed');
-    setPw({ current: '', next: '', confirm: '' });
-    setSaving(false);
+    setSavingPw(true);
+    const res = await api.post('/auth/change-password', { current: pw.current, next: pw.next });
+    if (res.status === 'success') {
+      success('Password changed');
+      setPw({ current: '', next: '', confirm: '' });
+    } else {
+      toastErr((res as { message: string }).message ?? 'Failed to change password');
+    }
+    setSavingPw(false);
   }
 
   return (
@@ -76,10 +86,10 @@ function SettingsContent() {
 
           <form onSubmit={saveProfile} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <h2 className="sm:col-span-2 text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>Profile information</h2>
-            <Input label="Display name" value={profile.name} onChange={(e) => setProfile((p) => ({ ...p, name: e.target.value }))} />
-            <Input label="Email address" type="email" value={profile.email} onChange={(e) => setProfile((p) => ({ ...p, email: e.target.value }))} />
+            <Input label="Display name" value={profile.name} onChange={(e) => setProfile((p) => ({ ...p, name: e.target.value }))} required />
+            <Input label="Email address" type="email" value={profile.email} onChange={(e) => setProfile((p) => ({ ...p, email: e.target.value }))} required />
             <div className="sm:col-span-2">
-              <Button type="submit" loading={saving} variant="primary">Save profile</Button>
+              <Button type="submit" loading={savingProfile} variant="primary">Save profile</Button>
             </div>
           </form>
         </BentoCard>
@@ -89,11 +99,24 @@ function SettingsContent() {
           <form onSubmit={changePassword} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <h2 className="sm:col-span-2 text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>Change password</h2>
             <Input label="Current password" type="password" autoComplete="current-password" value={pw.current} onChange={(e) => setPw((p) => ({ ...p, current: e.target.value }))} required />
-            <div /> {/* spacer */}
+            <div />
             <Input label="New password" type="password" autoComplete="new-password" value={pw.next} onChange={(e) => setPw((p) => ({ ...p, next: e.target.value }))} hint="Min 8 characters" required />
-            <Input label="Confirm new password" type="password" autoComplete="new-password" value={pw.confirm} onChange={(e) => setPw((p) => ({ ...p, confirm: e.target.value }))} error={pw.confirm && pw.next !== pw.confirm ? 'Passwords do not match' : undefined} required />
+            <Input
+              label="Confirm new password"
+              type="password"
+              autoComplete="new-password"
+              value={pw.confirm}
+              onChange={(e) => setPw((p) => ({ ...p, confirm: e.target.value }))}
+              error={pw.confirm && pw.next !== pw.confirm ? 'Passwords do not match' : undefined}
+              required
+            />
             <div className="sm:col-span-2">
-              <Button type="submit" loading={saving} variant="secondary" disabled={pw.next !== pw.confirm || pw.next.length < 8}>
+              <Button
+                type="submit"
+                loading={savingPw}
+                variant="secondary"
+                disabled={pw.next !== pw.confirm || pw.next.length < 8 || !pw.current}
+              >
                 Update password
               </Button>
             </div>

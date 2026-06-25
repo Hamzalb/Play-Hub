@@ -156,7 +156,7 @@ export default function PricingPage() {
                       ))}
                     </ul>
 
-                    <Link href="/register">
+                    <Link href={`/member/subscription?plan=${plan._id}`}>
                       <Button
                         variant={isPopular ? 'primary' : 'secondary'}
                         size="md"

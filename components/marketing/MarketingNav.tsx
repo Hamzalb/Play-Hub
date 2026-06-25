@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -49,16 +50,7 @@ export function MarketingNav() {
             className="flex items-center gap-2 flex-shrink-0 pl-1"
             aria-label="PlayHub home"
           >
-            <div
-              className="h-7 w-7 rounded-full flex items-center justify-center"
-              style={{
-                background: 'var(--color-violet-mid)',
-                boxShadow:  '0 0 12px rgba(139,92,246,0.55)',
-              }}
-              aria-hidden="true"
-            >
-              <span className="text-white font-bold text-xs">P</span>
-            </div>
+            <Image src="/images/logo.png" alt="PlayHub logo" width={28} height={28} className="object-contain" />
             <span
               className="font-semibold text-sm tracking-tight"
               style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text-primary)' }}

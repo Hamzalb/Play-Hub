@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/Toast';
@@ -78,13 +79,7 @@ export default function RegisterPage() {
         {/* Logo */}
         <div className="mb-8 text-center">
           <Link href="/" className="inline-flex items-center gap-2.5 mb-6">
-            <div
-              className="h-10 w-10 rounded-xl flex items-center justify-center"
-              style={{ background: 'var(--color-violet-mid)', boxShadow: '0 0 20px rgba(139,92,246,0.5)' }}
-              aria-hidden="true"
-            >
-              <span className="text-white font-bold">P</span>
-            </div>
+            <Image src="/images/logo.png" alt="PlayHub logo" width={40} height={40} className="object-contain" />
             <span
               className="text-xl font-semibold"
               style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text-primary)' }}

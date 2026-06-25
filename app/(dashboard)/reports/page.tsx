@@ -6,26 +6,33 @@ import { BentoGrid } from '@/components/bento/BentoGrid';
 import { BentoCard } from '@/components/bento/BentoCard';
 import { KpiCard } from '@/components/ui/KpiCard';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { BarChart } from '@/components/charts/BarChart';
 import { SkeletonCard } from '@/components/ui/Skeleton';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/Toast';
 import { useBranch } from '@/lib/hooks/useBranch';
 import { DailyReport, ApiSuccess } from '@/types';
-import { BarChart2, TrendingUp } from '@/components/ui/icons';
+import { BarChart2, TrendingUp, Download } from '@/components/ui/icons';
+
+function toDateStr(d: Date) { return d.toISOString().slice(0, 10); }
 
 export default function ReportsPage() {
   const [reports, setReports] = useState<DailyReport[]>([]);
   const [selected, setSelected] = useState<DailyReport | null>(null);
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const today = toDateStr(new Date());
+  const sevenDaysAgo = toDateStr(new Date(Date.now() - 6 * 86_400_000));
+  const [fromDate, setFromDate] = useState(sevenDaysAgo);
+  const [toDate, setToDate]     = useState(today);
   const { success, error: toastError } = useToast();
   const { branchId } = useBranch();
 
   async function load() {
     if (!branchId) { setLoading(false); return; }
     setLoading(true);
-    const res = await api.get<DailyReport[]>(`/reports?branchId=${branchId}`);
+    const res = await api.get<DailyReport[]>(`/reports?branchId=${branchId}&from=${fromDate}&to=${toDate}`);
     if (res.status === 'success') {
       const data = (res as ApiSuccess<DailyReport[]>).data;
       setReports(data);
@@ -36,7 +43,32 @@ export default function ReportsPage() {
     setLoading(false);
   }
 
-  useEffect(() => { load(); }, [branchId]);
+  useEffect(() => { load(); }, [branchId, fromDate, toDate]);
+
+  function exportCsv() {
+    if (!selected) { toastError('Load a report first'); return; }
+    const rows = [
+      ['Metric', 'Value'],
+      ['Date', selected.date],
+      ['Total Revenue', selected.totalRevenue.toFixed(2)],
+      ['Session Revenue', selected.sessionRevenue.toFixed(2)],
+      ['Product Revenue', selected.productRevenue.toFixed(2)],
+      ['Total Orders', String(selected.totalOrders)],
+      ['New Members', String(selected.newMembers)],
+      ['Points Awarded', String(selected.loyaltyPointsAwarded)],
+      ['Points Redeemed', String(selected.loyaltyPointsRedeemed ?? 0)],
+      ...(selected.topProducts ?? []).map((p) => [`Product: ${p.name}`, (p.revenue ?? 0).toFixed(2)]),
+    ];
+    const csv = rows.map((r) => r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `playhub-report-${selected.date}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    success('Report exported');
+  }
 
   async function handleGenerate() {
     if (!branchId) { toastError('No branch selected — choose a branch first'); return; }
@@ -59,7 +91,7 @@ export default function ReportsPage() {
   return (
     <div className="px-4 py-8 sm:px-6 lg:px-8 max-w-[1200px] mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
+      <div className="flex items-start justify-between mb-6 gap-4 flex-wrap">
         <div>
           <h1
             className="text-2xl font-bold tracking-tight"
@@ -71,10 +103,37 @@ export default function ReportsPage() {
             Revenue snapshots generated nightly by cron
           </p>
         </div>
-        <Button loading={generating} onClick={handleGenerate}>
-          <BarChart2 size={16} />
-          Generate Today
-        </Button>
+        <div className="flex gap-2 flex-wrap items-end">
+          <Button variant="secondary" onClick={exportCsv}>
+            <Download size={15} />
+            Export CSV
+          </Button>
+          <Button loading={generating} onClick={handleGenerate}>
+            <BarChart2 size={16} />
+            Generate Today
+          </Button>
+        </div>
+      </div>
+
+      {/* Date filter */}
+      <div className="flex gap-3 items-end flex-wrap mb-8">
+        <Input
+          label="From"
+          type="date"
+          value={fromDate}
+          max={toDate}
+          onChange={(e) => setFromDate(e.target.value)}
+          className="w-40"
+        />
+        <Input
+          label="To"
+          type="date"
+          value={toDate}
+          min={fromDate}
+          max={today}
+          onChange={(e) => setToDate(e.target.value)}
+          className="w-40"
+        />
       </div>
 
       {loading ? (

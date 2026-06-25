@@ -52,6 +52,7 @@ export interface Branch {
 
 export interface Zone {
   id: string;
+  _id?: string;
   branchId: string;
   name: string;
   type: 'console' | 'pc' | 'vr' | 'arcade' | 'pool' | 'other';

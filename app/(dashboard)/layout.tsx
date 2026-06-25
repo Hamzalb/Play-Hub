@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,30 +11,33 @@ import { BranchProvider, useBranch } from '@/lib/hooks/useBranch';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/utils';
+import { api } from '@/lib/api';
+import { Alert, ApiSuccess } from '@/types';
 import {
   LayoutDashboard, ShoppingCart, Calendar, Users, Package,
-  UserCog, Percent, BarChart2, Bell, LogOut, Menu, X, Settings,
+  UserCog, Percent, BarChart2, Bell, LogOut, Menu, X, Settings, Layers, Building2,
 } from '@/components/ui/icons';
 
-const NAV_ITEMS: Array<{ href: string; label: string; Icon: IconComponent }> = [
+const NAV_ITEMS: Array<{ href: string; label: string; Icon: IconComponent; alertsBadge?: true }> = [
   { href: '/dashboard', label: 'Dashboard',  Icon: LayoutDashboard },
   { href: '/pos',       label: 'POS',        Icon: ShoppingCart },
   { href: '/bookings',  label: 'Bookings',   Icon: Calendar },
   { href: '/members',   label: 'Members',    Icon: Users },
+  { href: '/zones',     label: 'Zones',      Icon: Layers },
   { href: '/inventory', label: 'Inventory',  Icon: Package },
   { href: '/staff',     label: 'Staff',      Icon: UserCog },
   { href: '/pricing',   label: 'Pricing',    Icon: Percent },
   { href: '/reports',   label: 'Reports',    Icon: BarChart2 },
-  { href: '/alerts',    label: 'Alerts',     Icon: Bell },
-  { href: '/branches',  label: 'Branches',   Icon: LayoutDashboard },
+  { href: '/alerts',    label: 'Alerts',     Icon: Bell, alertsBadge: true },
+  { href: '/branches',  label: 'Branches',   Icon: Building2 },
   { href: '/settings',  label: 'Settings',   Icon: Settings },
 ];
 
 type IconComponent = React.FC<{ size?: number; className?: string; style?: React.CSSProperties }>;
 
 function NavItem({
-  href, label, Icon, active, onClick,
-}: { href: string; label: string; Icon: IconComponent; active: boolean; onClick?: () => void }) {
+  href, label, Icon, active, onClick, badgeCount,
+}: { href: string; label: string; Icon: IconComponent; active: boolean; onClick?: () => void; badgeCount?: number }) {
   return (
     <Link
       href={href}
@@ -52,9 +56,20 @@ function NavItem({
         className={cn('flex-shrink-0 transition-colors', active && 'text-[var(--color-violet-light)]')}
       />
       {label}
-      {active && (
-        <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[var(--color-violet-mid)]" aria-hidden="true" />
-      )}
+      <span className="ml-auto flex items-center gap-1">
+        {badgeCount != null && badgeCount > 0 && (
+          <span
+            className="h-4.5 min-w-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center"
+            style={{ background: 'var(--color-danger)', color: '#fff', lineHeight: 1 }}
+            aria-label={`${badgeCount} unresolved`}
+          >
+            {badgeCount > 99 ? '99+' : badgeCount}
+          </span>
+        )}
+        {active && !badgeCount && (
+          <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-violet-mid)]" aria-hidden="true" />
+        )}
+      </span>
     </Link>
   );
 }
@@ -64,6 +79,19 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
   const { user, logout } = useAuth();
   const router = useRouter();
   const { branchId, branchName, branches, setActiveBranch } = useBranch();
+  const [alertCount, setAlertCount] = useState(0);
+
+  const pollAlerts = useCallback(async () => {
+    if (!branchId) return;
+    const res = await api.get<Alert[]>(`/alerts?resolved=false&branchId=${branchId}`);
+    if (res.status === 'success') setAlertCount((res as ApiSuccess<Alert[]>).data.length);
+  }, [branchId]);
+
+  useEffect(() => {
+    pollAlerts();
+    const id = setInterval(pollAlerts, 30_000);
+    return () => clearInterval(id);
+  }, [pollAlerts]);
 
   async function handleLogout() {
     onClose?.();
@@ -78,12 +106,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
       {/* Logo */}
       <div className="flex items-center justify-between px-4 pt-6 pb-5 border-b border-[var(--color-border)]">
         <Link href="/dashboard" onClick={onClose} className="flex items-center gap-2.5">
-          <div
-            className="h-8 w-8 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: 'var(--color-violet-mid)', boxShadow: '0 0 16px rgba(139,92,246,0.5)' }}
-          >
-            <span className="text-white font-bold text-sm" aria-hidden="true">P</span>
-          </div>
+          <Image src="/images/logo.png" alt="PlayHub logo" width={32} height={32} className="object-contain flex-shrink-0" />
           <span
             className="text-base font-semibold tracking-tight"
             style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text-primary)' }}
@@ -143,17 +166,20 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 overflow-y-auto" aria-label="Main navigation">
         <ul role="list" className="flex flex-col gap-0.5">
-          {NAV_ITEMS.map(({ href, label, Icon }) => (
-            <li key={href}>
-              <NavItem
-                href={href}
-                label={label}
-                Icon={Icon}
-                active={pathname === href}
-                onClick={onClose}
-              />
-            </li>
-          ))}
+          {NAV_ITEMS
+            .filter((item) => item.href !== '/branches' || user?.role === 'super_admin')
+            .map(({ href, label, Icon, alertsBadge }) => (
+              <li key={href}>
+                <NavItem
+                  href={href}
+                  label={label}
+                  Icon={Icon}
+                  active={pathname === href}
+                  onClick={onClose}
+                  badgeCount={alertsBadge ? alertCount : undefined}
+                />
+              </li>
+            ))}
         </ul>
       </nav>
 

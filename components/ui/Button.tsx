@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, HTMLMotionProps } from 'framer-motion';
+import { motion, HTMLMotionProps, useReducedMotion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'gold';
@@ -47,11 +47,13 @@ export function Button({
   children, variant = 'primary', size = 'md',
   loading = false, disabled, className, ...props
 }: ButtonProps) {
+  const prefersReduced = useReducedMotion();
+
   return (
     <motion.button
-      whileTap={{ scale: 0.97 }}
-      whileHover={{ scale: 1.015 }}
-      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+      whileTap={prefersReduced ? undefined : { scale: 0.97 }}
+      whileHover={prefersReduced ? undefined : { scale: 1.015 }}
+      transition={prefersReduced ? { duration: 0 } : { type: 'spring', stiffness: 500, damping: 30 }}
       disabled={disabled || loading}
       className={cn(
         'inline-flex items-center justify-center font-medium transition-all duration-200',

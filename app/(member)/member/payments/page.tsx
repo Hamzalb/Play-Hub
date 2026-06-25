@@ -1,11 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { SkeletonRow } from '@/components/ui/Skeleton';
+import { MemberNav } from '@/components/member/MemberNav';
 import { api } from '@/lib/api';
 import { ApiSuccess } from '@/types';
 import { DollarSign } from '@/components/ui/icons';
@@ -33,13 +32,12 @@ export default function MemberPaymentsPage() {
   const totalSpent = orders.reduce((s, o) => s + (o.paymentStatus === 'completed' ? o.total : 0), 0);
 
   return (
+    <>
+    <MemberNav />
     <main className="min-h-dvh px-4 py-12 sm:px-8 max-w-[800px] mx-auto">
-      <div className="flex items-center gap-3 mb-8">
-        <Link href="/member"><Button variant="ghost" size="sm">← Portal</Button></Link>
-        <h1 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text-primary)' }}>
-          Payment History
-        </h1>
-      </div>
+      <h1 className="text-2xl font-bold mb-8" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text-primary)' }}>
+        Payment History
+      </h1>
 
       {/* Summary */}
       <div className="glass-card mb-6 flex items-center gap-5">
@@ -107,5 +105,6 @@ export default function MemberPaymentsPage() {
         </div>
       )}
     </main>
+    </>
   );
 }

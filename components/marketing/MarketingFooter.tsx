@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
@@ -98,13 +99,7 @@ export function MarketingFooter() {
           >
             {/* Logo */}
             <Link href="/home" className="flex items-center gap-2.5 mb-5" aria-label="PlayHub home">
-              <div
-                className="h-9 w-9 rounded-xl flex items-center justify-center"
-                style={{ background: 'var(--color-violet-mid)', boxShadow: '0 0 14px rgba(139,92,246,0.5)' }}
-                aria-hidden="true"
-              >
-                <span className="text-white font-bold text-sm">P</span>
-              </div>
+              <Image src="/images/logo.png" alt="PlayHub logo" width={36} height={36} className="object-contain" />
               <span
                 className="font-semibold text-base tracking-tight"
                 style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text-primary)' }}

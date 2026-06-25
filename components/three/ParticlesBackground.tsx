@@ -16,18 +16,20 @@ const PALETTE = [
   new THREE.Color('#fbbf24'),
 ];
 
-// Soft radial gradient particle texture (created once on the GPU via canvas)
+// Glow particle texture — bright core fading into a wide soft halo
 function createParticleTexture(): THREE.Texture {
-  const size = 64;
+  const size = 128;
   const canvas = document.createElement('canvas');
   canvas.width  = size;
   canvas.height = size;
   const ctx = canvas.getContext('2d')!;
   const cx  = size / 2;
   const g   = ctx.createRadialGradient(cx, cx, 0, cx, cx, cx);
-  g.addColorStop(0,    'rgba(255,255,255,0.9)');
-  g.addColorStop(0.35, 'rgba(255,255,255,0.5)');
-  g.addColorStop(1,    'rgba(255,255,255,0)');
+  g.addColorStop(0,    'rgba(255,255,255,1.0)');   // solid bright core
+  g.addColorStop(0.12, 'rgba(255,255,255,0.95)');  // tight inner bloom
+  g.addColorStop(0.3,  'rgba(255,255,255,0.55)');  // mid glow
+  g.addColorStop(0.6,  'rgba(255,255,255,0.15)');  // outer halo
+  g.addColorStop(1,    'rgba(255,255,255,0)');      // fade to transparent
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, size, size);
   const tex = new THREE.CanvasTexture(canvas);
@@ -72,8 +74,8 @@ export function ParticlesScene({ reduced }: { reduced: boolean }) {
       colors[i * 3 + 1] = c.g;
       colors[i * 3 + 2] = c.b;
 
-      // Random particle size (base in THREE units — attenuated by camera distance)
-      sizes[i]  = Math.random() * 0.35 + 0.12;
+      // Random particle size — larger for a glowing feel
+      sizes[i]  = Math.random() * 1.0 + 0.45;
       phases[i] = Math.random() * Math.PI * 2;
       speedY[i] = Math.random() * 0.007 + 0.002;   // slow upward drift
       speedX[i] = (Math.random() - 0.5) * 0.002;   // gentle side drift
@@ -114,8 +116,8 @@ export function ParticlesScene({ reduced }: { reduced: boolean }) {
       }
 
       // Twinkle: pulse size with a slow sine wave
-      const base = (Math.random() * 0.35 + 0.12);
-      sizes[i] = base + Math.sin(t * 1.2 + phases[i]!) * 0.06;
+      const base = (Math.random() * 1.0 + 0.45);
+      sizes[i] = base + Math.sin(t * 1.2 + phases[i]!) * 0.2;
     }
 
     posAttr.needsUpdate  = true;
@@ -131,12 +133,12 @@ export function ParticlesScene({ reduced }: { reduced: boolean }) {
         alphaMap={texture}
         vertexColors
         transparent
-        opacity={0.45}
-        size={0.22}
+        opacity={0.82}
+        size={0.65}
         sizeAttenuation
         blending={THREE.AdditiveBlending}
         depthWrite={false}
-        alphaTest={0.005}
+        alphaTest={0.002}
       />
     </points>
   );

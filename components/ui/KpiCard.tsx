@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { motion, useInView, useMotionValue, useSpring } from 'framer-motion';
+import { motion, useInView, useMotionValue, useSpring, useReducedMotion } from 'framer-motion';
 import { BentoCard } from '@/components/bento/BentoCard';
 import { cn } from '@/lib/utils';
 
@@ -28,16 +28,23 @@ function AnimatedNumber({ value, prefix = '', suffix = '' }: { value: number; pr
   const inView = useInView(ref, { once: true });
   const motionValue = useMotionValue(0);
   const spring = useSpring(motionValue, { damping: 28, stiffness: 90 });
+  const prefersReduced = useReducedMotion();
 
   useEffect(() => {
-    if (inView) motionValue.set(value);
-  }, [inView, motionValue, value]);
+    if (!inView) return;
+    if (prefersReduced) {
+      if (ref.current) ref.current.textContent = `${prefix}${Math.round(value).toLocaleString()}${suffix}`;
+    } else {
+      motionValue.set(value);
+    }
+  }, [inView, motionValue, value, prefersReduced, prefix, suffix]);
 
   useEffect(() =>
     spring.on('change', (v) => {
-      if (ref.current) ref.current.textContent = `${prefix}${Math.round(v).toLocaleString()}${suffix}`;
+      if (!prefersReduced && ref.current)
+        ref.current.textContent = `${prefix}${Math.round(v).toLocaleString()}${suffix}`;
     }),
-    [spring, prefix, suffix]
+    [spring, prefix, suffix, prefersReduced]
   );
 
   return <span ref={ref}>{prefix}0{suffix}</span>;

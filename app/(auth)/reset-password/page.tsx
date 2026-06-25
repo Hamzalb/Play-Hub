@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Suspense } from 'react';
@@ -138,10 +139,7 @@ export default function ResetPasswordPage() {
       >
         <div className="mb-8 text-center">
           <Link href="/home" className="inline-flex items-center gap-2 mb-6">
-            <div className="h-10 w-10 rounded-xl flex items-center justify-center"
-              style={{ background: 'var(--color-violet-mid)', boxShadow: '0 0 20px rgba(139,92,246,0.5)' }} aria-hidden="true">
-              <span className="text-white font-bold">P</span>
-            </div>
+            <Image src="/images/logo.png" alt="PlayHub logo" width={40} height={40} className="object-contain" />
             <span className="text-xl font-semibold" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text-primary)' }}>PlayHub</span>
           </Link>
           <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text-primary)' }}>
