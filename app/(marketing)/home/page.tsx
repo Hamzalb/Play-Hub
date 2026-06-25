@@ -199,22 +199,34 @@ function Hero() {
         </motion.div>
       </div>
 
-      {/* ── Right: 3D canvas ── */}
+      {/* ── Right: Morphing blob 3D canvas ── */}
       <div
         className="
           absolute inset-0 z-0 pointer-events-none
           lg:relative lg:inset-auto lg:flex-1 lg:self-stretch lg:z-0 lg:pointer-events-auto
         "
-        style={{ opacity: 0.7 }}
         aria-hidden="true"
       >
-        {/* Vignette fade on the left edge so 3D blends into text on lg */}
+        {/* Ambient CSS glow behind the canvas — warms up the dark bg */}
         <div
-          className="hidden lg:block absolute inset-y-0 left-0 w-32 z-10 pointer-events-none"
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: `
+              radial-gradient(ellipse 70% 60% at 60% 50%, rgba(109,40,217,0.18) 0%, transparent 70%),
+              radial-gradient(ellipse 50% 50% at 30% 30%, rgba(6,182,212,0.10) 0%, transparent 65%),
+              radial-gradient(ellipse 40% 40% at 75% 70%, rgba(245,158,11,0.08) 0%, transparent 65%)
+            `,
+          }}
+        />
+
+        {/* Left-edge vignette so blobs fade into the text side */}
+        <div
+          className="hidden lg:block absolute inset-y-0 left-0 w-40 z-10 pointer-events-none"
           style={{
             background: 'linear-gradient(90deg, var(--color-base) 0%, transparent 100%)',
           }}
         />
+
         <Suspense fallback={null}>
           <HeroCanvas />
         </Suspense>

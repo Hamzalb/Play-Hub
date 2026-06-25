@@ -23,8 +23,8 @@ export function HeroCanvas() {
 
   return (
     <Canvas
-      camera={{ position: [0, 0, 6.5], fov: 42 }}
-      dpr={[1, 1.5]}        // cap pixel ratio to protect performance
+      camera={{ position: [0, 0, 8], fov: 52 }}   // pulled back to frame 5 blobs
+      dpr={[1, 1.5]}
       gl={{ antialias: true, alpha: true }}
       style={{ background: 'transparent' }}
       aria-hidden="true"

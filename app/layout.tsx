@@ -1,17 +1,11 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono, Space_Grotesk } from 'next/font/google';
-import dynamic from 'next/dynamic';
 import './globals.css';
 import { ThemeProvider } from '@/components/ui/ThemeProvider';
 import { PageTransition } from '@/components/ui/PageTransition';
 import { AuthProvider } from '@/lib/auth';
 import { ToastProvider } from '@/components/ui/Toast';
-
-// Lazy-load particles — never SSR (WebGL), deferred so it doesn't block paint
-const ParticlesCanvas = dynamic(
-  () => import('@/components/three/ParticlesCanvas').then((m) => m.ParticlesCanvas),
-  { ssr: false, loading: () => null }
-);
+import { ParticlesProvider } from '@/components/three/ParticlesProvider';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -61,7 +55,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <div className="grain-overlay" aria-hidden="true" />
 
         {/* Layer 1: Global floating 3D particles (lazy, SSR:false, pointer-events:none) */}
-        <ParticlesCanvas />
+        <ParticlesProvider />
 
         {/* Layer 2: App content (z-index:2 — always above particles) */}
         <div className="page-content">
