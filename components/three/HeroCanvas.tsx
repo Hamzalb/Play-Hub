@@ -23,7 +23,7 @@ export function HeroCanvas() {
 
   return (
     <Canvas
-      camera={{ position: [0, 0, 8], fov: 52 }}   // pulled back to frame 5 blobs
+      camera={{ position: [0, 0, 9.5], fov: 58 }}  // wider FOV so blobs fill the full-width hero
       dpr={[1, 1.5]}
       gl={{ antialias: true, alpha: true }}
       style={{ background: 'transparent' }}

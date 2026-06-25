@@ -25,7 +25,7 @@ const HeroCanvas = dynamic(
         <div
           className="h-72 w-72 rounded-full"
           style={{
-            background: 'radial-gradient(circle, rgba(139,92,246,0.3) 0%, rgba(6,182,212,0.1) 60%, transparent 100%)',
+            background: 'radial-gradient(circle, rgba(139,92,246,0.3) 0%, rgba(34,211,238,0.1) 60%, transparent 100%)',
             filter: 'blur(32px)',
           }}
         />
@@ -105,14 +105,39 @@ function Hero() {
 
   return (
     <section
-      className="relative min-h-dvh flex flex-col lg:flex-row items-center overflow-hidden"
+      className="relative min-h-dvh flex items-center justify-center overflow-hidden"
       aria-label="Hero"
     >
-      {/* ── Left: text content ── */}
-      <div className="relative z-10 flex-1 flex flex-col justify-center px-6 sm:px-10 lg:pl-16 lg:pr-8 pt-24 pb-16 lg:py-0 max-w-2xl mx-auto lg:mx-0">
+      {/* ── 3D blobs — full-section background ── */}
+      <div
+        className="absolute inset-0 z-0 pointer-events-none"
+        aria-hidden="true"
+      >
+        <Suspense fallback={null}>
+          <HeroCanvas />
+        </Suspense>
+      </div>
+
+      {/* ── Radial vignette overlay for text readability ── */}
+      <div
+        className="absolute inset-0 z-[1] pointer-events-none"
+        style={{
+          background: `
+            radial-gradient(ellipse 85% 75% at 50% 50%,
+              rgba(3,5,12,0.05) 0%,
+              rgba(3,5,12,0.40) 55%,
+              rgba(3,5,12,0.80) 100%
+            )
+          `,
+        }}
+        aria-hidden="true"
+      />
+
+      {/* ── Text content — centered, above blobs ── */}
+      <div className="relative z-10 w-full text-center px-6 sm:px-10 pt-24 pb-16 max-w-4xl mx-auto">
         <motion.div variants={stagger} initial="hidden" animate="show">
           {/* Chip */}
-          <motion.div variants={item} className="mb-7">
+          <motion.div variants={item} className="mb-7 flex justify-center">
             <span className="stat-pill">
               <span
                 className="h-2 w-2 rounded-full animate-pulse"
@@ -129,29 +154,27 @@ function Hero() {
             className="text-gradient-hero mb-6 leading-[1.06] tracking-[-0.03em]"
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(2.5rem, 6vw, 5rem)',
+              fontSize: 'clamp(2.75rem, 7vw, 5.5rem)',
               fontWeight: 700,
             }}
           >
-            Run your
+            Run your entertainment
             <br />
-            entertainment
-            <br />
-            empire.
+            empire from one screen.
           </motion.h1>
 
           {/* Sub-headline */}
           <motion.p
             variants={item}
-            className="text-lg leading-relaxed mb-9"
-            style={{ color: 'var(--color-text-secondary)', maxWidth: '38ch' }}
+            className="text-lg leading-relaxed mb-9 mx-auto"
+            style={{ color: 'var(--color-text-secondary)', maxWidth: '42ch' }}
           >
             PlayHub unifies POS, bookings, members, loyalty, and live analytics —
             across every branch, in real time.
           </motion.p>
 
           {/* CTAs */}
-          <motion.div variants={item} className="flex gap-4 flex-wrap mb-12">
+          <motion.div variants={item} className="flex gap-4 justify-center flex-wrap mb-12">
             <Link href="/register">
               <Button variant="primary" size="xl">
                 Start for free
@@ -165,17 +188,17 @@ function Hero() {
             </Link>
           </motion.div>
 
-          {/* Stats row */}
+          {/* Stats row — centered */}
           <motion.div
             variants={item}
-            className="flex items-center gap-6 flex-wrap"
+            className="flex items-center justify-center gap-8 flex-wrap"
           >
             {[
               { value: '2,400+', label: 'Bookings/day' },
               { value: '$1.2M',  label: 'Revenue tracked' },
               { value: '99.9%',  label: 'Uptime SLA' },
             ].map(({ value, label }) => (
-              <div key={label} className="text-left">
+              <div key={label} className="text-center">
                 <p
                   className="text-xl font-bold tabular-nums tracking-tight"
                   style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text-primary)' }}
@@ -187,49 +210,8 @@ function Hero() {
                 </p>
               </div>
             ))}
-            <hr
-              aria-hidden="true"
-              className="hidden sm:block w-px h-8 border-none"
-              style={{ background: 'var(--color-border)' }}
-            />
-            <p className="text-xs" style={{ color: 'var(--color-text-muted)', maxWidth: '18ch' }}>
-              Trusted by arcades &amp; entertainment centers worldwide
-            </p>
           </motion.div>
         </motion.div>
-      </div>
-
-      {/* ── Right: Morphing blob 3D canvas ── */}
-      <div
-        className="
-          absolute inset-0 z-0 pointer-events-none
-          lg:relative lg:inset-auto lg:flex-1 lg:self-stretch lg:z-0 lg:pointer-events-auto
-        "
-        aria-hidden="true"
-      >
-        {/* Ambient CSS glow behind the canvas — warms up the dark bg */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: `
-              radial-gradient(ellipse 70% 60% at 60% 50%, rgba(109,40,217,0.18) 0%, transparent 70%),
-              radial-gradient(ellipse 50% 50% at 30% 30%, rgba(6,182,212,0.10) 0%, transparent 65%),
-              radial-gradient(ellipse 40% 40% at 75% 70%, rgba(245,158,11,0.08) 0%, transparent 65%)
-            `,
-          }}
-        />
-
-        {/* Left-edge vignette so blobs fade into the text side */}
-        <div
-          className="hidden lg:block absolute inset-y-0 left-0 w-40 z-10 pointer-events-none"
-          style={{
-            background: 'linear-gradient(90deg, var(--color-base) 0%, transparent 100%)',
-          }}
-        />
-
-        <Suspense fallback={null}>
-          <HeroCanvas />
-        </Suspense>
       </div>
 
       {/* Bottom gradient fade */}

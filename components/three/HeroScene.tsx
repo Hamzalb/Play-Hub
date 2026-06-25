@@ -1,5 +1,17 @@
 'use client';
 
+/**
+ * Morphing Noise Blobs — 3-colour system only
+ * Violet family : #8b5cf6 / #a78bfa (--color-violet-mid / --color-violet-light)
+ * Cyan family   : #22d3ee / #67e8f9 (--color-cyan / --color-cyan-light)
+ * Gold family   : #f59e0b / #fcd34d (--color-gold / --color-gold-light)
+ *
+ * Deep surface colours (lit by coloured point lights → appear as the accent):
+ *   Violet deep : #4c1d95 · #3b0764
+ *   Cyan deep   : #0c4a6e · #164e63
+ *   Gold deep   : #78350f · #451a03
+ */
+
 import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Float, MeshDistortMaterial } from '@react-three/drei';
@@ -11,18 +23,18 @@ function lerp(a: number, b: number, t: number) {
 
 // ─── Single morphing blob ─────────────────────────────────────────────────────
 interface BlobProps {
-  position: [number, number, number];
-  radius:   number;
-  color:    string;
-  emissive: string;
+  position:   [number, number, number];
+  radius:     number;
+  color:      string;
+  emissive:   string;
   emissiveIntensity?: number;
-  distort:  number;
-  speed:    number;
-  opacity:  number;
+  distort:    number;
+  speed:      number;
+  opacity:    number;
   metalness?: number;
   roughness?: number;
-  floatSpeed?:     number;
-  floatIntensity?: number;
+  floatSpeed?:        number;
+  floatIntensity?:    number;
   rotationIntensity?: number;
   reduced: boolean;
 }
@@ -42,8 +54,7 @@ function Blob({
       rotationIntensity={reduced ? 0 : rotationIntensity}
       floatIntensity={reduced ? 0 : floatIntensity}
     >
-      <mesh position={position} castShadow={false} receiveShadow={false}>
-        {/* High segment count for smooth morphing */}
+      <mesh position={position}>
         <sphereGeometry args={[radius, 128, 128]} />
         <MeshDistortMaterial
           color={color}
@@ -55,14 +66,14 @@ function Blob({
           metalness={metalness}
           transparent
           opacity={opacity}
-          depthWrite={false}   // clean overlap blending between blobs
+          depthWrite={false}
         />
       </mesh>
     </Float>
   );
 }
 
-// ─── Orbiting colored light ───────────────────────────────────────────────────
+// ─── Orbiting coloured light ──────────────────────────────────────────────────
 function OrbitLight({
   radius, speed, startAngle, yOffset, color, intensity, reduced,
 }: {
@@ -92,7 +103,6 @@ interface HeroSceneProps {
 export function HeroScene({ mouseX, mouseY, reduced }: HeroSceneProps) {
   const groupRef = useRef<THREE.Group>(null);
 
-  // Smooth parallax: entire blob cluster follows mouse
   useFrame(() => {
     if (!groupRef.current || reduced) return;
     groupRef.current.rotation.y = lerp(groupRef.current.rotation.y, mouseX *  0.22, 0.032);
@@ -103,32 +113,45 @@ export function HeroScene({ mouseX, mouseY, reduced }: HeroSceneProps) {
     <>
       <ambientLight intensity={0.08} />
 
-      {/* Static fill light so static mode isn't pitch black */}
+      {/* Static lights for reduced-motion fallback */}
       {reduced && (
         <>
           <pointLight position={[4, 3, 4]}   color="#8b5cf6" intensity={4} />
           <pointLight position={[-3, -2, -3]} color="#22d3ee" intensity={2.5} />
-          <pointLight position={[2, -3, 2]}   color="#fbbf24" intensity={2} />
+          <pointLight position={[2, -3, 2]}   color="#f59e0b" intensity={2} />
         </>
       )}
 
-      {/* Three orbiting lights paint changing color across the blobs */}
+      {/*
+        Orbiting lights — ONLY the 3 design-system accent colours:
+          #8b5cf6 = --color-violet-mid
+          #22d3ee = --color-cyan
+          #f59e0b = --color-gold
+          #a78bfa = --color-violet-light (4th, a lighter violet tint — stays in family)
+      */}
       {!reduced && (
         <>
-          <OrbitLight radius={4}   speed={0.38} startAngle={0}            yOffset={1}   color="#8b5cf6" intensity={5}   reduced={reduced} />
-          <OrbitLight radius={3.5} speed={0.25} startAngle={Math.PI}      yOffset={-1}  color="#22d3ee" intensity={3.5} reduced={reduced} />
-          <OrbitLight radius={5}   speed={0.17} startAngle={Math.PI / 2}  yOffset={0.5} color="#fbbf24" intensity={2.5} reduced={reduced} />
-          <OrbitLight radius={3}   speed={0.45} startAngle={Math.PI * 1.5} yOffset={0}  color="#f0abfc" intensity={2}   reduced={reduced} />
+          <OrbitLight radius={4}   speed={0.38} startAngle={0}             yOffset={1}   color="#8b5cf6" intensity={5}   reduced={reduced} />
+          <OrbitLight radius={3.5} speed={0.25} startAngle={Math.PI}       yOffset={-1}  color="#22d3ee" intensity={3.5} reduced={reduced} />
+          <OrbitLight radius={5}   speed={0.17} startAngle={Math.PI / 2}   yOffset={0.5} color="#f59e0b" intensity={2.5} reduced={reduced} />
+          <OrbitLight radius={3}   speed={0.45} startAngle={Math.PI * 1.5} yOffset={0}   color="#a78bfa" intensity={2}   reduced={reduced} />
         </>
       )}
 
       <group ref={groupRef}>
-        {/* ── Blob 1: Main large violet — center ─────────────────────────── */}
+        {/*
+          Blob colour families (deep surface + emissive):
+            Violet  deep → lit by violet light  → reads as #8b5cf6
+            Cyan    deep → lit by cyan light    → reads as #22d3ee
+            Gold    deep → lit by gold light    → reads as #f59e0b
+        */}
+
+        {/* ── 1. Main — large violet ──────────────────────────────────────── */}
         <Blob
           position={[0, 0, 0]}
           radius={2.4}
-          color="#5b21b6"
-          emissive="#3b0764"
+          color="#4c1d95"
+          emissive="#2e1065"
           emissiveIntensity={0.4}
           distort={0.48}
           speed={1.6}
@@ -141,11 +164,11 @@ export function HeroScene({ mouseX, mouseY, reduced }: HeroSceneProps) {
           reduced={reduced}
         />
 
-        {/* ── Blob 2: Cyan — upper-left ──────────────────────────────────── */}
+        {/* ── 2. Medium — cyan (upper-left) ──────────────────────────────── */}
         <Blob
           position={[-2.2, 1.6, -0.8]}
           radius={1.65}
-          color="#075985"
+          color="#0c4a6e"
           emissive="#082f49"
           emissiveIntensity={0.35}
           distort={0.58}
@@ -159,12 +182,12 @@ export function HeroScene({ mouseX, mouseY, reduced }: HeroSceneProps) {
           reduced={reduced}
         />
 
-        {/* ── Blob 3: Amber/gold — lower-right ──────────────────────────── */}
+        {/* ── 3. Smaller — gold (lower-right) ────────────────────────────── */}
         <Blob
           position={[2.1, -1.7, -0.4]}
           radius={1.35}
-          color="#b45309"
-          emissive="#78350f"
+          color="#78350f"
+          emissive="#451a03"
           emissiveIntensity={0.3}
           distort={0.52}
           speed={2.8}
@@ -177,30 +200,30 @@ export function HeroScene({ mouseX, mouseY, reduced }: HeroSceneProps) {
           reduced={reduced}
         />
 
-        {/* ── Blob 4: Pink/rose — upper-right, small ─────────────────────── */}
+        {/* ── 4. Small — violet lighter shade (upper-right) ──────────────── */}
         <Blob
           position={[2, 2.1, 0.3]}
           radius={0.9}
-          color="#9d174d"
-          emissive="#831843"
+          color="#5b21b6"
+          emissive="#3b0764"
           emissiveIntensity={0.45}
-          distort={0.68}
-          speed={3.5}
+          distort={0.65}
+          speed={3.4}
           opacity={0.62}
           metalness={0.78}
           roughness={0.09}
           floatSpeed={3.4}
-          floatIntensity={0.85}
+          floatIntensity={0.82}
           rotationIntensity={0.3}
           reduced={reduced}
         />
 
-        {/* ── Blob 5: Micro lavender — lower-left ───────────────────────── */}
+        {/* ── 5. Micro — cyan darker shade (lower-left) ──────────────────── */}
         <Blob
           position={[-1.6, -2, 0.8]}
           radius={0.72}
-          color="#7c3aed"
-          emissive="#4c1d95"
+          color="#164e63"
+          emissive="#0a2536"
           emissiveIntensity={0.5}
           distort={0.72}
           speed={4}

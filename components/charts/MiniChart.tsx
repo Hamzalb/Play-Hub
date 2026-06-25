@@ -13,7 +13,7 @@ interface MiniChartProps {
 const colorMap = {
   violet:  { stroke: 'var(--color-violet-light)', fill: 'rgba(139,92,246,0.15)' },
   gold:    { stroke: 'var(--color-gold-light)',   fill: 'rgba(245,158,11,0.15)' },
-  cyan:    { stroke: 'var(--color-cyan-light)',   fill: 'rgba(6,182,212,0.15)' },
+  cyan:    { stroke: 'var(--color-cyan-light)',   fill: 'rgba(34,211,238,0.15)' },
   success: { stroke: 'var(--color-success)',      fill: 'rgba(52,211,153,0.15)' },
   danger:  { stroke: 'var(--color-danger)',       fill: 'rgba(248,113,113,0.15)' },
 };
