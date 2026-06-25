@@ -40,6 +40,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html
       lang="en"
       data-theme="dark"
+      data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
       <body className="min-h-dvh bg-[var(--color-base)] text-[var(--color-text-primary)] overflow-x-hidden">

@@ -99,13 +99,18 @@ export default function LoginPage() {
 
             {/* Password with toggle */}
             <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="password"
-                className="text-xs font-semibold uppercase tracking-wider"
-                style={{ color: 'var(--color-text-muted)', letterSpacing: '0.08em' }}
-              >
-                Password
-              </label>
+              <div className="flex items-center justify-between">
+                <label
+                  htmlFor="password"
+                  className="text-xs font-semibold uppercase tracking-wider"
+                  style={{ color: 'var(--color-text-muted)', letterSpacing: '0.08em' }}
+                >
+                  Password
+                </label>
+                <Link href="/forgot-password" className="text-xs hover:underline" style={{ color: 'var(--color-violet-light)' }}>
+                  Forgot?
+                </Link>
+              </div>
               <div className="relative">
                 <input
                   id="password"

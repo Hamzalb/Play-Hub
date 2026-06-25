@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard, ShoppingCart, Calendar, Users, Package,
-  UserCog, Percent, BarChart2, Bell, LogOut, Menu, X,
+  UserCog, Percent, BarChart2, Bell, LogOut, Menu, X, Settings,
 } from '@/components/ui/icons';
 
 const NAV_ITEMS: Array<{ href: string; label: string; Icon: IconComponent }> = [
@@ -24,6 +24,8 @@ const NAV_ITEMS: Array<{ href: string; label: string; Icon: IconComponent }> = [
   { href: '/pricing',   label: 'Pricing',    Icon: Percent },
   { href: '/reports',   label: 'Reports',    Icon: BarChart2 },
   { href: '/alerts',    label: 'Alerts',     Icon: Bell },
+  { href: '/branches',  label: 'Branches',   Icon: LayoutDashboard },
+  { href: '/settings',  label: 'Settings',   Icon: Settings },
 ];
 
 type IconComponent = React.FC<{ size?: number; className?: string; style?: React.CSSProperties }>;

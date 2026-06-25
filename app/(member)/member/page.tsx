@@ -1,77 +1,90 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { Avatar } from '@/components/ui/Avatar';
+import { Calendar, DollarSign, TrendingUp, Clock } from '@/components/ui/icons';
 import { BentoGrid } from '@/components/bento/BentoGrid';
 import { BentoCard } from '@/components/bento/BentoCard';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { Avatar } from '@/components/ui/Avatar';
-import { api } from '@/lib/api';
-import { ApiSuccess } from '@/types';
 
-interface LoyaltyBalance { points: number; totalSpend: number; }
+const PORTAL_LINKS = [
+  { href: '/member/bookings',     label: 'My Bookings',       Icon: Calendar,    desc: 'View upcoming & past sessions',     color: 'violet' },
+  { href: '/member/loyalty',      label: 'Loyalty Points',    Icon: TrendingUp,  desc: 'Balance, history and redemption',   color: 'cyan'   },
+  { href: '/member/subscription', label: 'My Subscription',   Icon: Clock,       desc: 'Plan status and renewal',           color: 'gold'   },
+  { href: '/member/payments',     label: 'Payment History',   Icon: DollarSign,  desc: 'Past orders and receipts',          color: 'violet' },
+] as const;
 
 export default function MemberPortalPage() {
   const { user, logout } = useAuth();
-  const [loyalty, setLoyalty] = useState<LoyaltyBalance | null>(null);
 
-  useEffect(() => {
-    if (!user) return;
-    // In real flow, member ID would come from member-specific JWT claim
-    // For now, display placeholder until member auth is wired in Phase 13
-    setLoyalty({ points: 250, totalSpend: 125.00 });
-  }, [user]);
-
-  if (!user) return (
-    <main className="flex min-h-dvh items-center justify-center">
-      <p style={{ color: 'var(--color-text-muted)' }}>Please log in to view your portal.</p>
-    </main>
-  );
+  if (!user) {
+    return (
+      <main className="min-h-dvh flex flex-col items-center justify-center gap-4 px-6 text-center">
+        <p className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>Sign in to access your portal</p>
+        <Link href="/login"><Button variant="primary">Sign in</Button></Link>
+      </main>
+    );
+  }
 
   return (
-    <main className="min-h-dvh px-4 py-8 sm:px-8 max-w-[900px] mx-auto">
-      <div className="flex items-center justify-between mb-8 gap-4">
+    <main className="min-h-dvh px-4 py-12 sm:px-8 max-w-[900px] mx-auto">
+      {/* Header */}
+      <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        className="flex items-center justify-between mb-10 gap-4 flex-wrap">
         <div className="flex items-center gap-4">
           <Avatar name={user.name} size="lg" />
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{user.name}</h1>
+            <h1 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text-primary)' }}>
+              Hey, {user.name.split(' ')[0]}!
+            </h1>
             <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{user.email}</p>
           </div>
         </div>
         <Button variant="ghost" size="sm" onClick={logout}>Sign out</Button>
-      </div>
+      </motion.div>
 
+      {/* Quick links */}
       <BentoGrid>
-        <BentoCard col={6} glow="violet">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--color-text-muted)' }}>
-            Loyalty Points
-          </p>
-          <p className="text-5xl font-bold" style={{ color: 'var(--color-violet-light)' }}>
-            {loyalty?.points ?? '–'}
-          </p>
-          <p className="text-sm mt-2" style={{ color: 'var(--color-text-secondary)' }}>
-            ≈ ${((loyalty?.points ?? 0) * 0.01).toFixed(2)} value · Total spent: ${loyalty?.totalSpend.toFixed(2)}
-          </p>
-        </BentoCard>
+        {PORTAL_LINKS.map(({ href, label, Icon, desc, color }, idx) => (
+          <motion.div key={href}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: idx * 0.08, ease: [0.22, 1, 0.36, 1] }}
+            className="col-span-12 sm:col-span-6">
+            <Link href={href} className="block h-full">
+              <div className="glass-card h-full flex flex-col gap-3 group hover:border-[var(--color-violet)] transition-all cursor-pointer"
+                style={{ border: '1px solid var(--color-border)' }}>
+                <div className="h-10 w-10 rounded-[var(--radius-md)] flex items-center justify-center"
+                  style={{ background: `var(--color-${color}-dim)` }} aria-hidden="true">
+                  <Icon size={18} style={{ color: `var(--color-${color}-light)` }} />
+                </div>
+                <div>
+                  <p className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{label}</p>
+                  <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{desc}</p>
+                </div>
+                <p className="text-xs mt-auto" style={{ color: `var(--color-${color}-light)` }}>View →</p>
+              </div>
+            </Link>
+          </motion.div>
+        ))}
 
-        <BentoCard col={6}>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--color-text-muted)' }}>
-            Membership
-          </p>
-          <Badge variant="violet" className="mb-3">Active Member</Badge>
-          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-            Subscription management available in a future release.
-          </p>
-        </BentoCard>
-
-        <BentoCard col={12}>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--color-text-muted)' }}>
-            Recent Bookings
-          </p>
-          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-            Booking history display coming in Phase 13 polish.
-          </p>
+        {/* Book a session CTA */}
+        <BentoCard col={12} glow="violet">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <Badge variant="violet" className="mb-2">Ready to play?</Badge>
+              <h2 className="text-xl font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text-primary)' }}>
+                Book your next session
+              </h2>
+              <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+                Browse available zones and reserve your spot online.
+              </p>
+            </div>
+            <Link href="/book"><Button variant="primary" size="lg">Book now →</Button></Link>
+          </div>
         </BentoCard>
       </BentoGrid>
     </main>

@@ -1,7 +1,5 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-import { Suspense } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
@@ -9,88 +7,10 @@ import { Badge } from '@/components/ui/Badge';
 import { BentoGrid } from '@/components/bento/BentoGrid';
 import { BentoCard } from '@/components/bento/BentoCard';
 import { KpiCard } from '@/components/ui/KpiCard';
-import { ArrowRight, TrendingUp, Bell, ShoppingCart, Calendar, Users, Package, BarChart2 } from '@/components/ui/icons';
-
-// Lazy-load the 3D canvas — avoids SSR WebGL errors + defers heavy Three.js bundle
-const HeroCanvas = dynamic(
-  () => import('@/components/three/HeroCanvas').then((m) => m.HeroCanvas),
-  {
-    ssr: false,
-    loading: () => (
-      // Static CSS fallback while 3D loads (matches approximate visual)
-      <div
-        className="h-full w-full flex items-center justify-center"
-        aria-hidden="true"
-      >
-        <div
-          className="h-72 w-72 rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(139,92,246,0.3) 0%, rgba(34,211,238,0.1) 60%, transparent 100%)',
-            filter: 'blur(32px)',
-          }}
-        />
-      </div>
-    ),
-  }
-);
-
-// ─── Nav ──────────────────────────────────────────────────────────────────────
-function Nav() {
-  return (
-    <motion.nav
-      initial={{ opacity: 0, y: -12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 lg:px-12"
-      style={{
-        background: 'linear-gradient(180deg, rgba(3,5,12,0.92) 0%, transparent 100%)',
-        backdropFilter: 'blur(12px)',
-      }}
-      aria-label="Main navigation"
-    >
-      <Link href="/" className="flex items-center gap-2.5" aria-label="PlayHub home">
-        <div
-          className="h-8 w-8 rounded-xl flex items-center justify-center"
-          style={{ background: 'var(--color-violet-mid)', boxShadow: '0 0 16px rgba(139,92,246,0.6)' }}
-          aria-hidden="true"
-        >
-          <span className="text-white font-bold text-sm">P</span>
-        </div>
-        <span
-          className="font-semibold text-lg tracking-tight"
-          style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text-primary)' }}
-        >
-          PlayHub
-        </span>
-      </Link>
-
-      <div className="hidden md:flex items-center gap-8" role="list">
-        {['Features', 'Pricing', 'Docs'].map((item) => (
-          <a
-            key={item}
-            href="#"
-            role="listitem"
-            className="text-sm transition-colors duration-150"
-            style={{ color: 'var(--color-text-secondary)' }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-text-primary)')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-text-secondary)')}
-          >
-            {item}
-          </a>
-        ))}
-      </div>
-
-      <div className="flex items-center gap-3">
-        <Link href="/login">
-          <Button variant="ghost" size="sm">Sign in</Button>
-        </Link>
-        <Link href="/register">
-          <Button variant="primary" size="sm">Get started</Button>
-        </Link>
-      </div>
-    </motion.nav>
-  );
-}
+import { ArrowRight, TrendingUp, Bell, ShoppingCart, Calendar, Users, Package, BarChart2, Check } from '@/components/ui/icons';
+import { NoiseBlobBg } from '@/components/three/NoiseBlobBg';
+import { MarketingNav } from '@/components/marketing/MarketingNav';
+import { MarketingFooter } from '@/components/marketing/MarketingFooter';
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 function Hero() {
@@ -108,15 +28,8 @@ function Hero() {
       className="relative min-h-dvh flex items-center justify-center overflow-hidden"
       aria-label="Hero"
     >
-      {/* ── 3D blobs — full-section background ── */}
-      <div
-        className="absolute inset-0 z-0 pointer-events-none"
-        aria-hidden="true"
-      >
-        <Suspense fallback={null}>
-          <HeroCanvas />
-        </Suspense>
-      </div>
+      {/* ── SVG noise blob background ── */}
+      <NoiseBlobBg />
 
       {/* ── Radial vignette overlay for text readability ── */}
       <div
@@ -222,6 +135,130 @@ function Hero() {
         }}
         aria-hidden="true"
       />
+    </section>
+  );
+}
+
+// ─── What is PlayHub ──────────────────────────────────────────────────────────
+const PILLARS = [
+  {
+    title:  'Unified operations',
+    body:   'POS, bookings, inventory, staff, and loyalty — all connected in one place. No more switching between 5 different apps.',
+    color:  'violet',
+    checks: ['Point of sale', 'Online bookings', 'Inventory tracking', 'Staff scheduling'],
+  },
+  {
+    title:  'Built for scale',
+    body:   'One account covers every branch you own. Super admins see the full picture; managers and staff see only what they need.',
+    color:  'cyan',
+    checks: ['Multi-location ready', 'Role-based access', 'Branch-scoped data', 'Company-wide reports'],
+  },
+  {
+    title:  'Always real-time',
+    body:   'Revenue, occupancy, alerts, and inventory update the moment a transaction happens — not the morning after.',
+    color:  'gold',
+    checks: ['Live revenue feed', 'Socket.io updates', 'Instant alerts', 'Nightly auto-reports'],
+  },
+] as const;
+
+function WhatIsPlayHub() {
+  return (
+    <section
+      id="what-is-playhub"
+      className="px-6 py-24 max-w-[1320px] mx-auto"
+      aria-labelledby="whatis-heading"
+    >
+      {/* ── Intro copy ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-80px' }}
+        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+        className="max-w-2xl mb-16"
+      >
+        <Badge variant="violet" className="mb-4">What is PlayHub?</Badge>
+        <h2
+          id="whatis-heading"
+          className="text-4xl lg:text-5xl font-bold tracking-tight mb-5 leading-[1.08]"
+          style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text-primary)' }}
+        >
+          The operating system
+          <br />
+          for entertainment centers.
+        </h2>
+        <p className="text-lg leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+          PlayHub is a purpose-built management platform for arcades, gaming lounges, VR venues,
+          bowling alleys, and anywhere people come to play. It replaces a drawer full of
+          disconnected tools with a single, elegant dashboard — accessible from any device,
+          updated in real time, and built to grow with you.
+        </p>
+      </motion.div>
+
+      {/* ── Three pillars ── */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {PILLARS.map(({ title, body, color, checks }, idx) => (
+          <motion.div
+            key={title}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 0.5, delay: idx * 0.1, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div
+              className="glass-card h-full flex flex-col"
+              style={{
+                borderColor: `rgba(${color === 'violet' ? '139,92,246' : color === 'cyan' ? '34,211,238' : '245,158,11'},0.2)`,
+              }}
+            >
+              {/* Accent bar */}
+              <div
+                className="h-1 w-12 rounded-full mb-5"
+                style={{ background: `var(--color-${color})` }}
+                aria-hidden="true"
+              />
+
+              <h3
+                className="text-xl font-bold mb-3"
+                style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text-primary)' }}
+              >
+                {title}
+              </h3>
+              <p className="text-sm leading-relaxed mb-6 flex-1" style={{ color: 'var(--color-text-secondary)' }}>
+                {body}
+              </p>
+
+              {/* Check list */}
+              <ul className="flex flex-col gap-2" aria-label={`${title} features`}>
+                {checks.map((item) => (
+                  <li key={item} className="flex items-center gap-2.5">
+                    <span
+                      className="h-5 w-5 rounded-full flex items-center justify-center flex-shrink-0"
+                      style={{ background: `rgba(${color === 'violet' ? '139,92,246' : color === 'cyan' ? '34,211,238' : '245,158,11'},0.15)` }}
+                      aria-hidden="true"
+                    >
+                      <Check
+                        size={11}
+                        strokeWidth={2.5}
+                        style={{ color: `var(--color-${color}${color === 'violet' ? '-light' : color === 'cyan' ? '-light' : '-light'})` }}
+                      />
+                    </span>
+                    <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* ── Divider into Features ── */}
+      <div className="mt-24 flex items-center gap-6">
+        <div className="flex-1 h-px" style={{ background: 'var(--color-border)' }} />
+        <p className="text-xs uppercase tracking-widest flex-shrink-0" style={{ color: 'var(--color-text-muted)' }}>
+          Explore the full platform
+        </p>
+        <div className="flex-1 h-px" style={{ background: 'var(--color-border)' }} />
+      </div>
     </section>
   );
 }
@@ -361,34 +398,18 @@ function FooterCta() {
   );
 }
 
-// ─── Footer ───────────────────────────────────────────────────────────────────
-function Footer() {
-  return (
-    <footer className="px-6 pb-10 max-w-[1320px] mx-auto">
-      <hr className="divider mb-8" />
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
-          © 2025 PlayHub. All rights reserved.
-        </p>
-        <p className="text-sm" style={{ color: 'var(--color-text-faint)' }}>
-          Built with Next.js · Express · MongoDB
-        </p>
-      </div>
-    </footer>
-  );
-}
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function LandingPage() {
   return (
     <>
-      <Nav />
+      <MarketingNav />
       <main id="home-main">
         <Hero />
+        <WhatIsPlayHub />
         <Features />
         <FooterCta />
-        <Footer />
       </main>
+      <MarketingFooter />
     </>
   );
 }
