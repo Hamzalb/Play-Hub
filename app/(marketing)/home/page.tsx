@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { BentoGrid } from '@/components/bento/BentoGrid';
@@ -263,6 +264,66 @@ function WhatIsPlayHub() {
   );
 }
 
+// ─── Venue showcase ───────────────────────────────────────────────────────────
+function VenueShowcase() {
+  return (
+    <section className="px-6 pb-20 max-w-[1320px] mx-auto" aria-label="Venue showcase">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-80px' }}
+        transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+        className="relative overflow-hidden"
+        style={{
+          borderRadius: 'var(--radius-xl)',
+          border: '1px solid var(--color-border)',
+          aspectRatio: '21/9',
+        }}
+      >
+        <Image
+          src="/images/venue-hero.png"
+          alt="Modern entertainment center interior — the kind PlayHub manages"
+          fill
+          className="object-cover"
+          sizes="(max-width: 1320px) 100vw, 1320px"
+        />
+        {/* gradient overlay */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `
+              linear-gradient(90deg, rgba(3,5,12,0.82) 0%, rgba(3,5,12,0.35) 55%, rgba(3,5,12,0.15) 100%),
+              linear-gradient(0deg, rgba(3,5,12,0.6) 0%, transparent 40%)
+            `,
+          }}
+          aria-hidden="true"
+        />
+        {/* text overlay */}
+        <div className="absolute inset-0 flex flex-col justify-center px-10 sm:px-16 max-w-xl">
+          <p
+            className="text-xs font-semibold uppercase tracking-widest mb-3"
+            style={{ color: 'var(--color-violet-light)' }}
+          >
+            Built for venues like this
+          </p>
+          <h2
+            className="text-2xl sm:text-4xl font-bold tracking-tight mb-4 leading-[1.1]"
+            style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text-primary)' }}
+          >
+            Arcades. VR lounges.
+            <br />
+            Bowling alleys. All of it.
+          </h2>
+          <p className="text-sm sm:text-base leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+            PlayHub runs the full operation — from the moment a guest walks in to the
+            nightly revenue report sent automatically at close.
+          </p>
+        </div>
+      </motion.div>
+    </section>
+  );
+}
+
 // ─── Features bento ───────────────────────────────────────────────────────────
 const FEATURES = [
   { Icon: ShoppingCart, label: 'POS',        color: 'violet', desc: 'Touch-first counter sales with live pricing and loyalty.' },
@@ -406,6 +467,7 @@ export default function LandingPage() {
       <main id="home-main">
         <Hero />
         <WhatIsPlayHub />
+        <VenueShowcase />
         <Features />
         <FooterCta />
       </main>

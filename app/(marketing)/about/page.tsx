@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import type { Metadata } from 'next';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -116,8 +117,33 @@ function Story() {
           </div>
         </motion.div>
 
-        {/* Right — stat card */}
+        {/* Right — venue image + stat cards */}
         <motion.div {...fadeUp(0.15)} className="flex flex-col gap-4">
+          {/* Venue photo */}
+          <div
+            className="relative overflow-hidden"
+            style={{ aspectRatio: '16/9', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)' }}
+          >
+            <Image
+              src="/images/venue-hero.png"
+              alt="Modern gaming lounge interior with neon lighting"
+              fill
+              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              priority
+            />
+            <div
+              className="absolute inset-0"
+              style={{ background: 'linear-gradient(0deg, rgba(3,5,12,0.75) 0%, transparent 55%)' }}
+              aria-hidden="true"
+            />
+            <p
+              className="absolute bottom-3 left-4 text-xs font-medium"
+              style={{ color: 'var(--color-text-muted)' }}
+            >
+              Galaxy Arcade — Downtown branch
+            </p>
+          </div>
           <div className="glass-card glass-card-violet">
             <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: 'var(--color-text-muted)' }}>
               Before PlayHub
