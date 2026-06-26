@@ -4,7 +4,7 @@ const BACKEND_URL = (
   process.env.BACKEND_URL ??
   process.env.NEXT_PUBLIC_API_URL ??
   'http://localhost:5000'
-).trim();
+).split('\n')[0].trim();
 
 const nextConfig: NextConfig = {
   async rewrites() {
