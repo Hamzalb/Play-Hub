@@ -6,11 +6,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
+import { NoiseBlobBg } from '@/components/three/NoiseBlobBg';
 import { useToast } from '@/components/ui/Toast';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import {
-  ShoppingCart, Calendar, Users, BarChart2, Check,
+  ShoppingCart, Calendar, Users, BarChart2, Check, AlertCircle,
 } from '@/components/ui/icons';
 
 // ─── Brand panel (left, desktop only) ────────────────────────────────────────
@@ -30,50 +31,30 @@ function BrandPanel() {
       aria-hidden="true"
       style={{ background: 'linear-gradient(155deg, #0a0514 0%, #060d1f 50%, #030812 100%)' }}
     >
-      {/* Animated aurora blobs */}
-      <div className="pointer-events-none absolute inset-0">
-        <div
-          className="absolute rounded-full"
-          style={{
-            width: '70%', height: '55%',
-            top: '-15%', left: '-20%',
-            background: 'radial-gradient(ellipse, rgba(139,92,246,0.22) 0%, transparent 70%)',
-            filter: 'blur(60px)',
-            animation: 'aurora-drift 20s ease-in-out infinite alternate',
-          }}
-        />
-        <div
-          className="absolute rounded-full"
-          style={{
-            width: '60%', height: '50%',
-            bottom: '-10%', right: '-15%',
-            background: 'radial-gradient(ellipse, rgba(34,211,238,0.12) 0%, transparent 70%)',
-            filter: 'blur(70px)',
-            animation: 'aurora-drift 26s ease-in-out infinite alternate-reverse',
-          }}
-        />
-        <div
-          className="absolute rounded-full"
-          style={{
-            width: '40%', height: '40%',
-            top: '35%', left: '30%',
-            background: 'radial-gradient(ellipse, rgba(245,158,11,0.07) 0%, transparent 70%)',
-            filter: 'blur(50px)',
-            animation: 'aurora-drift 32s ease-in-out infinite alternate',
-          }}
-        />
-        {/* Subtle grid */}
-        <div
-          className="absolute inset-0 opacity-[0.035]"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)
-            `,
-            backgroundSize: '48px 48px',
-          }}
-        />
-      </div>
+      {/* Goo blob background — same as marketing hero */}
+      <NoiseBlobBg />
+
+      {/* Vignette — keeps text readable over the 3D */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        aria-hidden="true"
+        style={{
+          background: 'radial-gradient(ellipse 90% 80% at 50% 50%, transparent 10%, rgba(6,9,21,0.72) 100%)',
+        }}
+      />
+
+      {/* Subtle grid */}
+      <div
+        className="absolute inset-0 opacity-[0.04] pointer-events-none"
+        aria-hidden="true"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)
+          `,
+          backgroundSize: '48px 48px',
+        }}
+      />
 
       {/* Logo */}
       <motion.div
@@ -215,17 +196,6 @@ export default function LoginPage() {
 
       {/* Right — form */}
       <div className="flex flex-col items-center justify-center px-6 py-16 relative">
-        {/* Mobile-only subtle glow */}
-        <div
-          className="lg:hidden fixed top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-          style={{
-            width: '500px', height: '300px',
-            background: 'radial-gradient(ellipse, rgba(139,92,246,0.10) 0%, transparent 70%)',
-            filter: 'blur(40px)',
-          }}
-          aria-hidden="true"
-        />
-
         <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -259,14 +229,7 @@ export default function LoginPage() {
           </div>
 
           {/* Card */}
-          <div
-            className="rounded-[var(--radius-xl)] p-7 mb-5"
-            style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.07)',
-              boxShadow: '0 2px 40px -8px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03) inset',
-            }}
-          >
+          <div className="glass-card glass-card-violet mb-5">
             <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate aria-label="Sign in form">
               <Input
                 label="Email address"
@@ -276,6 +239,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@company.com"
                 required
+                showRequired
               />
 
               <div className="flex flex-col gap-1.5">
@@ -289,7 +253,7 @@ export default function LoginPage() {
                   </label>
                   <Link
                     href="/forgot-password"
-                    className="text-xs font-medium transition-colors"
+                    className="text-xs font-medium transition-colors hover:opacity-75"
                     style={{ color: 'var(--color-violet-light)' }}
                   >
                     Forgot password?
@@ -319,7 +283,7 @@ export default function LoginPage() {
                     border: '1px solid rgba(248,113,113,0.18)',
                   }}
                 >
-                  <span className="mt-px flex-shrink-0">✕</span>
+                  <AlertCircle size={13} className="mt-px flex-shrink-0" />
                   {fieldError}
                 </motion.div>
               )}
