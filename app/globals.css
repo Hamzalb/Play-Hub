@@ -391,6 +391,17 @@ select, label { touch-action: manipulation; }
 .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .table-scroll table { min-width: 600px; width: 100%; }
 
+/* ─── Glass card padding — scale down on small screens ──────────────────────  */
+@media (max-width: 479px) {
+  :root { --bento-p: 1rem; --bento-gap: 0.75rem; }
+}
+@media (min-width: 480px) and (max-width: 639px) {
+  :root { --bento-p: 1.25rem; --bento-gap: 0.875rem; }
+}
+@media (min-width: 640px) and (max-width: 767px) {
+  :root { --bento-p: 1.4rem; }
+}
+
 /* ─── Mobile-only helpers ────────────────────────────────────────────────────  */
 .hide-mobile  { display: none; }
 @media (min-width: 768px) { .hide-mobile  { display: unset; } }

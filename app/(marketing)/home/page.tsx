@@ -198,7 +198,7 @@ function WhatIsPlayHub() {
   return (
     <section
       id="what-is-playhub"
-      className="px-6 py-24 max-w-[1320px] mx-auto"
+      className="px-4 sm:px-6 py-16 sm:py-24 max-w-[1320px] mx-auto"
       aria-labelledby="whatis-heading"
     >
       {/* ── Intro copy ── */}
@@ -302,17 +302,16 @@ function WhatIsPlayHub() {
 // ─── Venue showcase ───────────────────────────────────────────────────────────
 function VenueShowcase() {
   return (
-    <section className="px-6 pb-20 max-w-[1320px] mx-auto" aria-label="Venue showcase">
+    <section className="px-4 sm:px-6 pb-12 sm:pb-20 max-w-[1320px] mx-auto" aria-label="Venue showcase">
       <motion.div
         initial={{ opacity: 0, y: 24, scale: 0.97, filter: 'blur(6px)' }}
         whileInView={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
         viewport={{ once: true, margin: '-80px' }}
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-        className="relative overflow-hidden"
+        className="relative overflow-hidden aspect-[4/3] sm:aspect-[16/9] lg:aspect-[21/9]"
         style={{
           borderRadius: 'var(--radius-xl)',
           border: '1px solid var(--color-border)',
-          aspectRatio: '21/9',
         }}
       >
         <Image
@@ -339,7 +338,7 @@ function VenueShowcase() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: '-80px' }}
-          className="absolute inset-0 flex flex-col justify-center px-10 sm:px-16 max-w-xl"
+          className="absolute inset-0 flex flex-col justify-center px-5 sm:px-10 lg:px-16 max-w-xl"
         >
           <motion.p
             variants={SECTION_ITEM}
@@ -379,7 +378,7 @@ const FEATURES = [
 
 function Features() {
   return (
-    <section className="px-6 pb-32 max-w-[1320px] mx-auto" aria-labelledby="features-heading">
+    <section className="px-4 sm:px-6 pb-16 sm:pb-32 max-w-[1320px] mx-auto" aria-labelledby="features-heading">
       <motion.div
         initial={{ opacity: 0, y: 20, scale: 0.96, filter: 'blur(8px)' }}
         whileInView={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
@@ -478,14 +477,13 @@ function Features() {
 // ─── Footer CTA ───────────────────────────────────────────────────────────────
 function FooterCta() {
   return (
-    <section className="px-6 pb-24 max-w-[900px] mx-auto text-center" aria-label="Call to action">
+    <section className="px-4 sm:px-6 pb-16 sm:pb-24 max-w-[900px] mx-auto text-center" aria-label="Call to action">
       <motion.div
         initial={{ opacity: 0, y: 24, scale: 0.96, filter: 'blur(8px)' }}
         whileInView={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
         viewport={{ once: true, margin: '-80px' }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         className="glass-card glass-card-violet"
-        style={{ padding: '3.5rem 2.5rem' }}
       >
         <h2
           className="text-4xl font-bold tracking-tight mb-4"

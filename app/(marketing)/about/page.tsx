@@ -208,7 +208,6 @@ function Mission() {
       <motion.div
         {...fadeUp()}
         className="max-w-[1320px] mx-auto glass-card glass-card-violet text-center"
-        style={{ padding: '4rem 2.5rem' }}
       >
         <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: 'var(--color-text-muted)' }}>
           Our mission

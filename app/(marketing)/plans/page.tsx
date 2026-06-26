@@ -77,7 +77,7 @@ export default function PricingPage() {
       <MarketingNav />
       <main id="main-content" className="pt-28">
         {/* Hero */}
-        <section className="px-6 pb-16 max-w-[900px] mx-auto text-center">
+        <section className="px-4 sm:px-6 pb-16 max-w-[900px] mx-auto text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number,number,number,number] }}>
             <Badge variant="violet" className="mb-5">Membership plans</Badge>
             <h1
@@ -93,7 +93,7 @@ export default function PricingPage() {
         </section>
 
         {/* Plan cards */}
-        <section className="px-6 pb-20 max-w-[1100px] mx-auto">
+        <section className="px-4 sm:px-6 pb-20 max-w-[1100px] mx-auto">
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
@@ -174,8 +174,8 @@ export default function PricingPage() {
         </section>
 
         {/* Free tier explanation */}
-        <section className="px-6 pb-24 max-w-[900px] mx-auto">
-          <div className="glass-card text-center" style={{ padding: '2.5rem' }}>
+        <section className="px-4 sm:px-6 pb-24 max-w-[900px] mx-auto">
+          <div className="glass-card text-center">
             <h2 className="text-xl font-bold mb-3" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text-primary)' }}>
               Everything included at every tier
             </h2>
