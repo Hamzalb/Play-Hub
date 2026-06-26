@@ -21,16 +21,16 @@ const SECTION_STAGGER = {
   show: { transition: { staggerChildren: 0.13, delayChildren: 0 } },
 };
 const SECTION_ITEM = {
-  hidden: { opacity: 0, y: 16, scale: 0.88, filter: 'blur(14px)' },
-  show:   { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', transition: { duration: 0.65, ease: EASE } },
+  hidden: { opacity: 0, y: 16, scale: 0.92 },
+  show:   { opacity: 1, y: 0, scale: 1, transition: { duration: 0.65, ease: EASE } },
 };
 const CARD_ANIM = {
-  hidden: { opacity: 0, y: 24, scale: 0.93, filter: 'blur(14px)' },
-  show:   { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', transition: { duration: 0.65, ease: EASE, staggerChildren: 0.12, delayChildren: 0.1 } },
+  hidden: { opacity: 0, y: 24, scale: 0.95 },
+  show:   { opacity: 1, y: 0, scale: 1, transition: { duration: 0.65, ease: EASE, staggerChildren: 0.12, delayChildren: 0.1 } },
 };
 const WORD_VARIANT = {
-  hidden: { opacity: 0, scale: 0.7, filter: 'blur(16px)', y: 8 },
-  show:   { opacity: 1, scale: 1, filter: 'blur(0px)', y: 0, transition: { duration: 0.75, ease: EASE } },
+  hidden: { opacity: 0, scale: 0.82, y: 10 },
+  show:   { opacity: 1, scale: 1, y: 0, transition: { duration: 0.65, ease: EASE } },
 };
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
@@ -40,8 +40,8 @@ function Hero() {
     show: { transition: { staggerChildren: 0.1, delayChildren: 0.3 } },
   };
   const item = {
-    hidden: { opacity: 0, y: 24, scale: 0.85, filter: 'blur(14px)' },
-    show:   { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', transition: { duration: 0.72, ease: EASE } },
+    hidden: { opacity: 0, y: 24, scale: 0.9 },
+    show:   { opacity: 1, y: 0, scale: 1, transition: { duration: 0.72, ease: EASE } },
   };
   const headline = {
     hidden: {},
